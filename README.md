@@ -22,15 +22,14 @@ parlamento/
     └── index.html          # Web frontend
 ```
 
-## Instalación en la VM (Ubuntu 24.04)
+## Instalación en la VM (Ubuntu 24.04) -> mediante clonación del repositorio
 
 ```bash
-# 1. Copia el proyecto a la VM
-scp -r parlamento/ usuario@IP-VM:/tmp/
+# 1. Clona el repositorio
+git clone https://github.com/pablomartinez16/parlamento-andalucia
 
 # 2. Ejecuta el instalador (en la VM)
-ssh usuario@IP-VM
-cd /tmp/parlamento
+cd /parlamento-andalucia
 sudo bash install.sh
 ```
 
