@@ -38,9 +38,9 @@ def obtener_urls_json_dinamicamente() -> dict:
         resp = requests.get(OPENDATA_URL, headers=HEADERS, timeout=30)
         resp.raise_for_status()
         
-        # Buscar patrones de URLs JSON con timestamps
+        # Buscar patrones de URLs JSON (relativas o absolutas)
         urls_json = re.findall(
-            r'https://www\.congreso\.es/webpublica/opendata/iniciativas/[^"]+\.json',
+            r'(?:https://www\.congreso\.es)?(/webpublica/opendata/iniciativas/[^"]+\.json)',
             resp.text
         )
         
@@ -48,8 +48,17 @@ def obtener_urls_json_dinamicamente() -> dict:
             log.error("❌ No se encontraron URLs JSON en la página de OpenData")
             return {}
         
-        # Eliminar duplicados y mapear a tipos
-        urls_unicas = list(set(urls_json))
+        # Convertir a URLs absolutas y eliminar duplicados
+        urls_completas = []
+        for url in urls_json:
+            # Si es relativa, construir URL absoluta
+            if url.startswith('/'):
+                url_completa = f"https://www.congreso.es{url}"
+            else:
+                url_completa = url
+            urls_completas.append(url_completa)
+        
+        urls_unicas = list(set(urls_completas))
         log.info(f"✓ Encontrados {len(urls_unicas)} datasets JSON")
         
         datasets = {}
