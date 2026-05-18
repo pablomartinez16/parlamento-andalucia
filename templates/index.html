@@ -163,6 +163,11 @@
     footer{text-align:center;padding:20px 32px;border-top:1px solid var(--borde);font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--gris);letter-spacing:.08em}
     .sync-info{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--gris);margin-top:4px}
 
+    @media (min-width:901px){
+      .nav-drawer{display:none!important}
+      .hamburger{display:none!important}
+    }
+
     @media (max-width:900px){
       /* Layout: stack main and sidebar */
       .header-top{flex-wrap:wrap;align-items:center}
@@ -190,9 +195,9 @@
       .nav-close{background:none;border:none;font-size:1.4rem;padding:6px;float:right;cursor:pointer}
       .nav-drawer-list{display:flex;flex-direction:column;gap:10px;margin-top:18px}
       .drawer-item{background:var(--verde);color:var(--crema);border:none;padding:12px 14px;border-radius:8px;text-align:left;font-family:'Inter',system-ui,sans-serif;cursor:pointer}
-      .nav-filters{margin-top:8px}
-      .nav-filters button{padding:10px 14px;font-size:.95rem;border-radius:8px;min-width:80px}
-      .nav-filters button.active{background:rgba(255,255,255,.08)}
+      .nav-filters{display:none}
+      .nav-filters button{display:none}
+      .nav-filters button.active{display:none}
 
       /* Toolbar: stack controls vertically */
       .toolbar{flex-direction:column;align-items:stretch;gap:10px}
@@ -225,7 +230,7 @@
       <img src="/static/img/logo-parlamento.svg" alt="Logo Parlamento de Andalucía" class="logo-parlamento"/>
       <div>
         <h1>Parlamento de Andalucía</h1>
-        <span>Seguimiento Legislativo · Datos reales</span>
+        <span>Seguimiento Legislativo</span>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:10px">
