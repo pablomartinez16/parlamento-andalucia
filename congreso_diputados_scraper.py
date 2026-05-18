@@ -120,18 +120,23 @@ def procesar_iniciativa(iniciativa: dict, camara_id: int) -> bool:
             tipo=tipo,
         )
         
+        # Preparar datos en formato que espera insertar_iniciativa
+        datos = {
+            "tipo": tipo,
+            "numero": num_expediente,
+            "titulo": titulo_db,
+            "url": url,
+            "estado": estado,
+            "fecha_presentacion": fecha,
+            "grupo_autor": iniciativa.get("AUTOR", ""),
+            "texto_completo": titulo_db,
+            "resumen": resultado_ia.get("resumen", ""),
+            "tematicas": resultado_ia.get("tematicas", []),
+            "posicion_grupos": resultado_ia.get("posicion_grupos", {}),
+        }
+        
         # Insertar en BD
-        db.insertar_iniciativa(
-            camara_id=camara_id,
-            tipo=tipo,
-            titulo=titulo_db,
-            url=url,
-            estado=estado,
-            fecha_registro=fecha,
-            resumen=resultado_ia.get("resumen", ""),
-            tematicas=json.dumps(resultado_ia.get("tematicas", [])),
-            posiciones_grupos=json.dumps(resultado_ia.get("posicion_grupos", {})),
-        )
+        db.insertar_iniciativa(camara_id=camara_id, datos=datos)
         return True
     except Exception as e:
         log.error(f"Error procesando iniciativa: {e}")
