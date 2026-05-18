@@ -17,9 +17,12 @@
 
     header{background:var(--verde);color:var(--crema);position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.35)}
     .header-top{display:flex;align-items:center;justify-content:space-between;padding:14px 32px;border-bottom:2px solid var(--oro)}
-    .brand{display:flex;align-items:center;gap:14px}
+    .brand{display:flex;align-items:center;gap:14px;min-width:0}
+    .brand > div{min-width:0}
+    .brand h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .logo-parlamento{height:48px;width:auto;display:block}
     header .brand .logo-parlamento{filter:brightness(0) invert(1);}
+    .hamburger{display:none;background:none;border:1px solid rgba(255,255,255,.12);color:var(--crema);padding:6px 10px;border-radius:6px;font-size:1.1rem;cursor:pointer}
     .brand h1{font-family:'Poppins',Inter,system-ui,sans-serif;font-size:1.1rem;font-weight:600;color:var(--crema);line-height:1.2}
     .brand span{font-family:'Inter',system-ui,sans-serif;font-size:.66rem;color:var(--oro-claro);letter-spacing:.08em;text-transform:uppercase}
     .legislature-badge{background:transparent;color:var(--crema);font-family:'Inter',system-ui,sans-serif;font-size:.72rem;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.12);letter-spacing:.06em;white-space:nowrap}
@@ -162,6 +165,8 @@
 
     @media (max-width:900px){
       /* Layout: stack main and sidebar */
+      .header-top{flex-wrap:wrap;align-items:center}
+      .brand{flex:1;min-width:0}
       .main{grid-template-columns:1fr;padding:16px;gap:18px}
       .sidebar{order:2}
       .stats-bar{grid-template-columns:repeat(2,1fr);gap:8px;padding:10px 16px}
@@ -174,6 +179,18 @@
 
       /* Navigation: touch-friendly, horizontally scrollable */
       .nav-filters{padding:6px 12px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+      .nav-filters{display:none}
+      .hamburger{display:inline-block}
+
+      /* Nav drawer as overlay with slide animation */
+      .nav-drawer{position:fixed;inset:0;display:flex;align-items:stretch;justify-content:flex-start;z-index:250;opacity:0;pointer-events:none;transition:opacity .28s ease}
+      .nav-drawer.open{opacity:1;pointer-events:auto;background:rgba(0,0,0,0.45)}
+      .nav-drawer-inner{background:var(--crema);width:86%;max-width:340px;height:100%;padding:18px;box-shadow:18px 0 40px rgba(0,0,0,0.28);transform:translateX(-100%);transition:transform .36s cubic-bezier(.2,.9,.2,1)}
+      .nav-drawer.open .nav-drawer-inner{transform:translateX(0)}
+      .nav-close{background:none;border:none;font-size:1.4rem;padding:6px;float:right;cursor:pointer}
+      .nav-drawer-list{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+      .drawer-item{background:var(--verde);color:var(--crema);border:none;padding:12px 14px;border-radius:8px;text-align:left;font-family:'Inter',system-ui,sans-serif;cursor:pointer}
+      .nav-filters{margin-top:8px}
       .nav-filters button{padding:10px 14px;font-size:.95rem;border-radius:8px;min-width:80px}
       .nav-filters button.active{background:rgba(255,255,255,.08)}
 
@@ -211,7 +228,10 @@
         <span>Seguimiento Legislativo · Datos reales</span>
       </div>
     </div>
-    <div class="legislature-badge" id="legislature-badge">X Legislatura · 2026–2030</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="legislature-badge" id="legislature-badge">X Legislatura · 2026–2030</div>
+      <button class="hamburger" id="hamburger" aria-label="Mostrar navegación">☰</button>
+    </div>
   </div>
   <nav class="nav-filters">
     <button class="active" data-tipo="">Todas</button>
@@ -221,6 +241,20 @@
     <button data-tipo="Moción">Mociones</button>
     <button data-tipo="Proposición no de Ley">PNL</button>
   </nav>
+  <!-- Mobile drawer (hidden by default) -->
+  <div id="nav-drawer" class="nav-drawer" aria-hidden="true">
+    <div class="nav-drawer-inner">
+      <button class="nav-close" id="nav-close" aria-label="Cerrar">✕</button>
+      <div class="nav-drawer-list">
+        <button data-tipo="" class="drawer-item">Todas</button>
+        <button data-tipo="Proyecto de Ley" class="drawer-item">Proyectos de Ley</button>
+        <button data-tipo="Proposición de Ley" class="drawer-item">Proposiciones de Ley</button>
+        <button data-tipo="Decreto-ley" class="drawer-item">Decretos-ley</button>
+        <button data-tipo="Moción" class="drawer-item">Mociones</button>
+        <button data-tipo="Proposición no de Ley" class="drawer-item">PNL</button>
+      </div>
+    </div>
+  </div>
 </header>
 
 <div class="stats-bar">
@@ -360,7 +394,7 @@ function renderParlamento(s) {
   document.getElementById('parlamento-meta').textContent = `${leg || 'Legislatura actual'} · ${totalSeats} escaños · Mayoría absoluta: ${majority}`;
 
   const parties = s.partidos || s.representacion || s.escanos || s.representacion_partidos || {};
-  const fallback = { 'PP':58,'PSOE-A':30,'VOX':14,'PorA':5,'AA':2 };
+  const fallback = { 'PP':53,'PSOE-A':28,'VOX':15,'PorA':5,'AA':8 };
   const rawMap = Object.keys(parties).length ? parties : fallback;
 
   const entries = Object.entries(rawMap).map(([g,v]) => [g, Number(v || 0)])
@@ -629,6 +663,54 @@ document.querySelectorAll(".nav-filters button").forEach(btn => {
 // ── Init ──────────────────────────────────────────────────────────
 cargarStats();
 cargarIniciativas();
+// ── Mobile drawer handlers ───────────────────────────────────────
+document.getElementById('hamburger').addEventListener('click', () => {
+  const d = document.getElementById('nav-drawer');
+  d.classList.add('open');
+  d.setAttribute('aria-hidden','false');
+  document.body.style.overflow = 'hidden';
+});
+document.getElementById('nav-close').addEventListener('click', () => {
+  const d = document.getElementById('nav-drawer');
+  d.classList.remove('open');
+  d.setAttribute('aria-hidden','true');
+  document.body.style.overflow = '';
+});
+// Wire drawer buttons
+document.querySelectorAll('.drawer-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-filters button').forEach(b => b.classList.remove('active'));
+    filtros.tipo = btn.dataset.tipo || '';
+    filtros.pagina = 1;
+    cargarIniciativas();
+    const d = document.getElementById('nav-drawer');
+    d.classList.remove('open');
+    d.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+  });
+});
+// Close drawer when clicking overlay (outside inner)
+document.getElementById('nav-drawer').addEventListener('click', (ev) => {
+  const inner = document.querySelector('.nav-drawer-inner');
+  if (!inner) return;
+  if (!inner.contains(ev.target)) {
+    const d = document.getElementById('nav-drawer');
+    d.classList.remove('open');
+    d.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+  }
+});
+// Close on ESC
+document.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Escape') {
+    const d = document.getElementById('nav-drawer');
+    if (d && d.classList.contains('open')) {
+      d.classList.remove('open');
+      d.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+  }
+});
 </script>
 </body>
 </html>
