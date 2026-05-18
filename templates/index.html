@@ -5,60 +5,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Parlamento de Andalucía — Seguimiento Legislativo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --verde:#006633;--verde-claro:#1a8a4a;--oro:#c9a227;--oro-claro:#e8c547;
-      --crema:#faf7f0;--crema-oscura:#f0ead8;--tinta:#1a1208;--tinta-suave:#3d3020;
-      --gris:#8a7f6e;--rojo:#b83232;--rojo-claro:#e05050;--borde:#d4c9a8;
+      --verde:#0f766e;--verde-claro:#10b981;--oro:#f59e0b;--oro-claro:#fcd34d;
+      --crema:#fbfbfc;--crema-oscura:#f4f6f8;--tinta:#0f1724;--tinta-suave:#334155;
+      --gris:#94a3b8;--rojo:#ef4444;--rojo-claro:#f87171;--borde:#e6edf3;
     }
     *{margin:0;padding:0;box-sizing:border-box}
-    body{background:var(--crema);color:var(--tinta);font-family:'Source Serif 4',serif;min-height:100vh;overflow-x:hidden}
+    body{background:var(--crema);color:var(--tinta);font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,'Noto Sans',sans-serif;min-height:100vh;overflow-x:hidden}
 
     header{background:var(--verde);color:var(--crema);position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.35)}
     .header-top{display:flex;align-items:center;justify-content:space-between;padding:14px 32px;border-bottom:2px solid var(--oro)}
     .brand{display:flex;align-items:center;gap:14px}
-    .brand h1{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--crema);line-height:1.2}
-    .brand span{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--oro-claro);letter-spacing:.12em;text-transform:uppercase}
-    .legislature-badge{background:var(--oro);color:var(--tinta);font-family:'IBM Plex Mono',monospace;font-size:.7rem;font-weight:500;padding:5px 12px;border-radius:2px;letter-spacing:.08em;white-space:nowrap}
+    .logo-parlamento{height:48px;width:auto;display:block}
+    header .brand .logo-parlamento{filter:brightness(0) invert(1);}
+    .brand h1{font-family:'Poppins',Inter,system-ui,sans-serif;font-size:1.1rem;font-weight:600;color:var(--crema);line-height:1.2}
+    .brand span{font-family:'Inter',system-ui,sans-serif;font-size:.66rem;color:var(--oro-claro);letter-spacing:.08em;text-transform:uppercase}
+    .legislature-badge{background:transparent;color:var(--crema);font-family:'Inter',system-ui,sans-serif;font-size:.72rem;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.12);letter-spacing:.06em;white-space:nowrap}
     .nav-filters{display:flex;padding:0 32px;overflow-x:auto}
-    .nav-filters button{background:none;border:none;color:rgba(250,247,240,.65);font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;padding:9px 16px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap}
+    .nav-filters button{background:none;border:none;color:rgba(255,255,255,.85);font-family:'Inter',system-ui,sans-serif;font-size:.78rem;letter-spacing:.02em;padding:8px 14px;cursor:pointer;border-radius:6px;transition:all .18s;white-space:nowrap}
     .nav-filters button:hover{color:var(--crema)}
-    .nav-filters button.active{color:var(--oro-claro);border-bottom-color:var(--oro)}
+    .nav-filters button.active{color:var(--crema);background:rgba(255,255,255,.06)}
 
-    .stats-bar{background:var(--crema-oscura);border-bottom:1px solid var(--borde);padding:16px 32px;display:grid;grid-template-columns:repeat(4,1fr)}
-    .stat-item{text-align:center;padding:8px 12px;border-right:1px solid var(--borde)}
+    .stats-bar{background:transparent;border-bottom:none;padding:12px 32px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .stat-item{text-align:center;padding:8px 12px}
     .stat-item:last-child{border-right:none}
-    .stat-num{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--verde);line-height:1}
-    .stat-label{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gris);margin-top:3px}
+    .stat-num{font-family:'Poppins',Inter,system-ui,sans-serif;font-size:1.6rem;font-weight:700;color:var(--verde);line-height:1}
+    .stat-label{font-family:'Inter',system-ui,sans-serif;font-size:.68rem;color:var(--gris);margin-top:4px}
 
     .main{max-width:1400px;margin:0 auto;padding:28px 32px;display:grid;grid-template-columns:1fr 320px;gap:28px}
 
     .toolbar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
-    .parlamento-card{background:white;border:1px solid var(--borde);border-radius:2px;margin-bottom:18px;overflow:hidden}
+    .parlamento-card{background:white;border:1px solid var(--borde);border-radius:10px;margin-bottom:18px;overflow:hidden;box-shadow:0 8px 28px rgba(15,23,36,0.06)}
     .parlamento-head{background:var(--tinta);color:var(--crema);padding:10px 14px;border-bottom:2px solid var(--oro)}
-    .parlamento-head h2{font-family:'IBM Plex Mono',monospace;font-size:.67rem;letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+    .parlamento-head h2{font-family:'Inter',system-ui,sans-serif;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600}
     .parlamento-body{padding:14px}
-    .parlamento-meta{font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.05em;color:var(--gris);margin-bottom:12px}
+    .parlamento-meta{font-family:'Inter',system-ui,sans-serif;font-size:.75rem;letter-spacing:.02em;color:var(--gris);margin-bottom:12px}
     .escanos-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
     .escanos-row{display:grid;grid-template-columns:72px 1fr 36px;gap:8px;align-items:center}
-    .escanos-grupo{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--tinta)}
+    .escanos-grupo{font-family:'Inter',system-ui,sans-serif;font-size:.72rem;color:var(--tinta);font-weight:600}
     .escanos-track{height:9px;background:var(--crema-oscura);border-radius:4px;overflow:hidden}
     .escanos-fill{height:100%}
     .escanos-num{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--tinta);text-align:right}
     .escanos-grid{display:grid;grid-template-columns:repeat(5,minmax(88px,1fr));gap:8px}
-    .escano-chip{background:var(--crema);border:1px solid var(--borde);border-radius:2px;padding:7px 8px;display:flex;justify-content:space-between;align-items:center}
-    .escano-chip .label{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--tinta-suave);letter-spacing:.06em}
-    .escano-chip .value{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--tinta)}
+    .escano-chip{background:var(--crema);border:1px solid var(--borde);border-radius:10px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 6px 18px rgba(15,23,36,0.04)}
+    .escano-chip .label{font-family:'Inter',system-ui,sans-serif;font-size:.66rem;color:var(--tinta-suave);letter-spacing:.02em}
+    .escano-chip .value{font-family:'Poppins',Inter,system-ui,sans-serif;font-size:1rem;font-weight:700;color:var(--tinta)}
 
     .search-box{flex:1;min-width:200px;position:relative}
-    .search-box input{width:100%;background:white;border:1.5px solid var(--borde);color:var(--tinta);font-family:'Source Serif 4',serif;font-size:.88rem;padding:9px 14px 9px 38px;border-radius:2px;outline:none;transition:border-color .2s}
+    .search-box input{width:100%;background:white;border:1.5px solid var(--borde);color:var(--tinta);font-family:'Inter',system-ui,sans-serif;font-size:.94rem;padding:10px 14px 10px 40px;border-radius:10px;outline:none;transition:border-color .2s;box-shadow:0 6px 14px rgba(15,23,36,0.04)}
     .search-box input:focus{border-color:var(--verde)}
     .search-box::before{content:'⌕';position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--gris);font-size:1.1rem}
     .filter-select{background:white;border:1.5px solid var(--borde);color:var(--tinta);font-family:'IBM Plex Mono',monospace;font-size:.68rem;padding:9px 12px;border-radius:2px;cursor:pointer;outline:none}
 
     .medidas-list{display:flex;flex-direction:column;gap:14px}
-    .medida-card{background:white;border:1px solid var(--borde);border-left:5px solid var(--gris);border-radius:2px;cursor:pointer;transition:box-shadow .2s,transform .15s}
+    .medida-card{background:white;border:1px solid var(--borde);border-left:5px solid var(--gris);border-radius:10px;cursor:pointer;transition:box-shadow .18s,transform .15s}
     .medida-card:hover{box-shadow:4px 8px 24px rgba(0,0,0,.1);transform:translateY(-1px)}
     .medida-card.aprobada{border-left-color:var(--verde-claro)}
     .medida-card.rechazada{border-left-color:var(--rojo)}
@@ -75,7 +77,7 @@
     .tag-estado.rechazada{background:var(--rojo)}
     .tag-estado.pendiente{background:var(--oro);color:var(--tinta)}
     .tag-estado.retirada{background:var(--gris)}
-    .card-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--tinta);line-height:1.3;flex:1}
+    .card-title{font-family:'Poppins',Inter,system-ui,sans-serif;font-size:1rem;font-weight:700;color:var(--tinta);line-height:1.3;flex:1}
     .card-num{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--gris);white-space:nowrap;margin-top:3px}
     .card-body{padding:0 18px 14px}
     .card-resumen{font-size:.86rem;color:var(--tinta-suave);line-height:1.6;font-style:italic}
@@ -120,7 +122,7 @@
     .modal{background:var(--crema);border:1px solid var(--borde);border-radius:3px;max-width:740px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.4);animation:slideUp .25s ease}
     @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
     .modal-header{background:var(--verde);padding:18px 24px;border-bottom:3px solid var(--oro);display:flex;justify-content:space-between;align-items:flex-start}
-    .modal-header h2{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--crema);line-height:1.3}
+    .modal-header h2{font-family:'Poppins',Inter,system-ui,sans-serif;font-size:1.05rem;color:var(--crema);line-height:1.3}
     .modal-num{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--oro-claro);letter-spacing:.1em;margin-top:3px}
     .modal-close{background:none;border:none;color:var(--oro-claro);font-size:1.5rem;cursor:pointer;line-height:1;padding:0 0 0 14px}
     .modal-body{padding:24px}
@@ -133,7 +135,7 @@
     .voto-box.a-favor{background:#e8f5ee;border:1px solid var(--verde-claro)}
     .voto-box.en-contra{background:#fdecea;border:1px solid var(--rojo-claro)}
     .voto-box.abstencion{background:#f5f3ee;border:1px solid var(--gris)}
-    .voto-box .num{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;line-height:1}
+    .voto-box .num{font-family:'Poppins',Inter,system-ui,sans-serif;font-size:1.6rem;font-weight:800;line-height:1}
     .voto-box.a-favor .num{color:var(--verde)}
     .voto-box.en-contra .num{color:var(--rojo)}
     .voto-box.abstencion .num{color:var(--gris)}
@@ -172,12 +174,7 @@
 <header>
   <div class="header-top">
     <div class="brand">
-      <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
-        <rect x="1" y="1" width="44" height="44" rx="4" fill="#005528" stroke="#c9a227" stroke-width="1.5"/>
-        <text x="23" y="18" text-anchor="middle" font-size="9" fill="#c9a227" font-family="serif" font-weight="bold">⚖</text>
-        <text x="23" y="28" text-anchor="middle" font-size="6" fill="#faf7f0" font-family="serif">PARLAMENTO</text>
-        <text x="23" y="36" text-anchor="middle" font-size="5" fill="#c9a227" font-family="serif">ANDALUCÍA</text>
-      </svg>
+      <img src="/static/img/logo-parlamento.svg" alt="Logo Parlamento de Andalucía" class="logo-parlamento"/>
       <div>
         <h1>Parlamento de Andalucía</h1>
         <span>Seguimiento Legislativo · Datos reales</span>
@@ -207,41 +204,11 @@
     <div class="parlamento-card">
       <div class="parlamento-head"><h2>Representación actual del Parlamento</h2></div>
       <div class="parlamento-body">
-        <div class="parlamento-meta">XII Legislatura (2022-2026) · 109 escaños · Mayoría absoluta: 55</div>
-        <div class="escanos-list">
-          <div class="escanos-row">
-            <div class="escanos-grupo">PP</div>
-            <div class="escanos-track"><div class="escanos-fill" style="width:53.2%;background:#185a9b"></div></div>
-            <div class="escanos-num">58</div>
-          </div>
-          <div class="escanos-row">
-            <div class="escanos-grupo">PSOE-A</div>
-            <div class="escanos-track"><div class="escanos-fill" style="width:27.5%;background:#c23737"></div></div>
-            <div class="escanos-num">30</div>
-          </div>
-          <div class="escanos-row">
-            <div class="escanos-grupo">VOX</div>
-            <div class="escanos-track"><div class="escanos-fill" style="width:12.8%;background:#3f9b35"></div></div>
-            <div class="escanos-num">14</div>
-          </div>
-          <div class="escanos-row">
-            <div class="escanos-grupo">PorA</div>
-            <div class="escanos-track"><div class="escanos-fill" style="width:4.6%;background:#00a07a"></div></div>
-            <div class="escanos-num">5</div>
-          </div>
-          <div class="escanos-row">
-            <div class="escanos-grupo">AA</div>
-            <div class="escanos-track"><div class="escanos-fill" style="width:1.8%;background:#1b7f57"></div></div>
-            <div class="escanos-num">2</div>
-          </div>
+        <div class="parlamento-meta" id="parlamento-meta">Cargando representación…</div>
+        <div id="escanos-list" class="escanos-list">
+          <div class="loading">Cargando reparto de escaños…</div>
         </div>
-        <div class="escanos-grid">
-          <div class="escano-chip"><span class="label">PP</span><span class="value">58</span></div>
-          <div class="escano-chip"><span class="label">PSOE-A</span><span class="value">30</span></div>
-          <div class="escano-chip"><span class="label">VOX</span><span class="value">14</span></div>
-          <div class="escano-chip"><span class="label">PorA</span><span class="value">5</span></div>
-          <div class="escano-chip"><span class="label">AA</span><span class="value">2</span></div>
-        </div>
+        <div id="escanos-grid" class="escanos-grid"></div>
       </div>
     </div>
 
@@ -348,8 +315,57 @@ async function cargarStats() {
       o.value = o.textContent = nom;
       sel.appendChild(o);
     });
+    // Intentamos renderizar la representación del parlamento con los datos disponibles
+    try { renderParlamento(s); } catch(e) { console.warn('renderParlamento error', e); }
   } catch(e) {
     console.warn("Stats no disponibles:", e);
+  }
+}
+
+function renderParlamento(s) {
+  const totalSeats = Number(s.total_escanos || s.total || 109);
+  const majority = Math.floor(totalSeats/2) + 1;
+  const leg = s.legislatura || s.legislatura_nombre || '';
+  document.getElementById('parlamento-meta').textContent = `${leg || 'Legislatura actual'} · ${totalSeats} escaños · Mayoría absoluta: ${majority}`;
+
+  const parties = s.partidos || s.representacion || s.escanos || s.representacion_partidos || {};
+  const fallback = { 'PP':58,'PSOE-A':30,'VOX':14,'PorA':5,'AA':2 };
+  const rawMap = Object.keys(parties).length ? parties : fallback;
+
+  const entries = Object.entries(rawMap).map(([g,v]) => [g, Number(v || 0)])
+    .sort((a,b) => b[1] - a[1]);
+
+  const colorMap = { 'PP':'#185a9b','PSOE-A':'#c23737','PSOE':'#c23737','VOX':'#2f9b34','PorA':'#0aa188','AA':'#1b7f57' };
+
+  const listEl = document.getElementById('escanos-list');
+  const gridEl = document.getElementById('escanos-grid');
+  listEl.innerHTML = '';
+  gridEl.innerHTML = '';
+
+  let majorityHolder = null;
+  entries.forEach(([grupo, n]) => {
+    if (n >= majority && !majorityHolder) majorityHolder = { grupo, n };
+    const pct = totalSeats ? Math.round((n/totalSeats)*1000)/10 : 0;
+    const color = colorMap[grupo] || '#9aa6b2';
+    const row = document.createElement('div'); row.className = 'escanos-row';
+    row.innerHTML = `<div class="escanos-grupo">${grupo}</div>
+      <div class="escanos-track"><div class="escanos-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="escanos-num">${n}</div>`;
+    listEl.appendChild(row);
+
+    const chip = document.createElement('div'); chip.className='escano-chip';
+    chip.innerHTML = `<span class="label">${grupo}</span><span class="value">${n}</span>`;
+    gridEl.appendChild(chip);
+  });
+
+  if (majorityHolder) {
+    const note = document.createElement('div');
+    note.style.marginTop = '8px';
+    note.style.fontFamily = "Inter,system-ui,sans-serif";
+    note.style.fontSize = '0.95rem';
+    note.style.color = 'var(--verde)';
+    note.textContent = `Mayoría absoluta: ${majorityHolder.grupo} (${majorityHolder.n} escaños)`;
+    listEl.appendChild(note);
   }
 }
 
