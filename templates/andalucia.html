@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parlamento de Andalucía - Seguimiento Legislativo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-landmark me-2"></i>Seguimiento Legislativo
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home"></i> Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/congreso"><i class="fas fa-people-roof"></i> Congreso</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/andalucia"><i class="fas fa-landmark"></i> Andalucía</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-5 fw-bold">
+                    <i class="fas fa-landmark"></i> Parlamento de Andalucía
+                </h1>
+                <p class="text-muted">XII Legislatura | Seguimiento de iniciativas legislativas</p>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="row g-3 mb-4" id="stats-row">
+            <div class="col-md-6 col-lg-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="card-text small">Total</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Filtrar iniciativas</h5>
+                        <div class="row g-2">
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="search-input" placeholder="Buscar..." />
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" id="estado-filter">
+                                    <option value="">Todos los estados</option>
+                                    <option value="aprobada">Aprobada</option>
+                                    <option value="rechazada">Rechazada</option>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="retirada">Retirada</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" id="tipo-filter">
+                                    <option value="">Todos los tipos</option>
+                                    <option value="Proyecto de Ley">Proyecto de Ley</option>
+                                    <option value="Proposición de Ley">Proposición de Ley</option>
+                                    <option value="Proposición no de Ley">Proposición no de Ley</option>
+                                    <option value="Moción">Moción</option>
+                                    <option value="Decreto-ley">Decreto-ley</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-success w-100" id="apply-filters">
+                                    <i class="fas fa-search"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Iniciativas List -->
+        <div class="row">
+            <div class="col-12">
+                <div id="iniciativas-container">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paginación -->
+                <nav id="pagination-nav" aria-label="Paginación" class="mt-4" style="display:none;">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" id="prev-btn" style="display:none;">
+                            <a class="page-link" href="#" id="prev-link">Anterior</a>
+                        </li>
+                        <li class="page-item active" id="page-info">
+                            <span class="page-link">Página <span id="current-page">1</span></span>
+                        </li>
+                        <li class="page-item" id="next-btn" style="display:none;">
+                            <a class="page-link" href="#" id="next-link">Siguiente</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">Seguimiento Legislativo ES v2.0 | Parlamento de Andalucía</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarDatos('Parlamento de Andalucía');
+        });
+    </script>
+</body>
+</html>
