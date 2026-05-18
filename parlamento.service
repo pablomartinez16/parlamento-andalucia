@@ -1,0 +1,24 @@
+# /etc/systemd/system/parlamento.service
+# Instalar con:
+#   sudo cp parlamento.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now parlamento
+
+[Unit]
+Description=Parlamento de Andalucía — Web legislativa
+After=network.target
+
+[Service]
+User=parlamento
+WorkingDirectory=/opt/parlamento
+ExecStart=/opt/parlamento/venv/bin/gunicorn \
+    --workers 2 \
+    --bind 0.0.0.0:5000 \
+    --timeout 60 \
+    --access-logfile /opt/parlamento/gunicorn.log \
+    app:app
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
