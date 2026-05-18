@@ -1,39 +1,29 @@
 #!/usr/bin/env python3
 """
-Módulo de IA local usando llama-cpp-python con Phi-3-mini Q4.
+Módulo de IA local usando llama-cpp-python con TinyLlama 1.1B.
+Optimizado para 4GB RAM: ~700 MB modelo, ~300-400 MB en uso.
 Carga el modelo una sola vez por ejecución del scraper.
-Con 4 GB RAM: el modelo ocupa ~1.8 GB, deja margen suficiente.
 """
 
 import json
 import logging
-import os
 import re
 from pathlib import Path
-from functools import lru_cache
+
+import config
 
 log = logging.getLogger(__name__)
 
-MODEL_PATH = Path(__file__).parent / "models" / "Phi-3-mini-4k-instruct-Q4_K_M.gguf"
-MODEL_REPO = "microsoft/Phi-3-mini-4k-instruct-gguf"
-MODEL_FILE = "Phi-3-mini-4k-instruct-q4.gguf"
-
-TEMATICAS_DISPONIBLES = [
-    "Sanidad", "Educación", "Vivienda", "Economía", "Medio ambiente",
-    "Infraestructuras", "Empleo", "Seguridad", "Justicia", "Agricultura",
-    "Turismo", "Cultura", "Servicios sociales", "Administración pública",
-    "Financiación autonómica", "Igualdad", "Agua", "Energía", "Transporte",
-]
-
-GRUPOS = [
-    "PP-A", "PSOE-A", "Vox", "Por Andalucía", "Adelante Andalucía",
-]
+MODEL_PATH = config.IA_MODEL_PATH
+MODEL_REPO = config.IA_MODEL_REPO
+MODEL_FILE = config.IA_MODEL_FILE
+TEMATICAS_DISPONIBLES = config.TEMATICAS_DISPONIBLES
 
 _llm = None
 
 
 def _get_llm():
-    """Carga el modelo una sola vez (singleton)."""
+    """Carga TinyLlama una sola vez (singleton)."""
     global _llm
     if _llm is not None:
         return _llm
@@ -45,17 +35,17 @@ def _get_llm():
         return None
 
     if not MODEL_PATH.exists():
-        log.info("Descargando modelo %s...", MODEL_FILE)
+        log.info("Descargando modelo %s (~700MB)...", MODEL_FILE)
         try:
             _llm = Llama.from_pretrained(
                 repo_id=MODEL_REPO,
                 filename=MODEL_FILE,
                 cache_dir=str(MODEL_PATH.parent),
-                n_ctx=4096,
-                n_threads=2,
+                n_ctx=config.IA_CONTEXT_SIZE,
+                n_threads=config.IA_THREADS,
                 verbose=False,
             )
-            log.info("Modelo cargado desde HuggingFace.")
+            log.info("Modelo TinyLlama cargado desde HuggingFace.")
         except Exception as e:
             log.error("Error al descargar modelo: %s", e)
             return None
@@ -63,11 +53,11 @@ def _get_llm():
         try:
             _llm = Llama(
                 model_path=str(MODEL_PATH),
-                n_ctx=4096,
-                n_threads=2,
+                n_ctx=config.IA_CONTEXT_SIZE,
+                n_threads=config.IA_THREADS,
                 verbose=False,
             )
-            log.info("Modelo cargado desde disco.")
+            log.info("Modelo TinyLlama cargado desde disco (~300-400 MB en memoria).")
         except Exception as e:
             log.error("Error al cargar modelo: %s", e)
             return None
@@ -75,8 +65,11 @@ def _get_llm():
     return _llm
 
 
-def _llamar_ia(prompt: str, max_tokens: int = 512) -> str:
+def _llamar_ia(prompt: str, max_tokens: int = None) -> str:
     """Llama al modelo y devuelve el texto generado."""
+    if max_tokens is None:
+        max_tokens = config.IA_MAX_TOKENS
+    
     llm = _get_llm()
     if llm is None:
         return ""
@@ -87,7 +80,7 @@ def _llamar_ia(prompt: str, max_tokens: int = 512) -> str:
                     "role": "system",
                     "content": (
                         "Eres un asistente experto en derecho parlamentario español "
-                        "y en el funcionamiento del Parlamento de Andalucía. "
+                        "y en el funcionamiento del Parlamento de Andalucía y el Congreso de Diputados. "
                         "Respondes siempre en español, de forma clara y concisa. "
                         "Cuando se te pide JSON, devuelves ÚNICAMENTE el JSON, "
                         "sin texto adicional ni bloques de código."
@@ -96,7 +89,7 @@ def _llamar_ia(prompt: str, max_tokens: int = 512) -> str:
                 {"role": "user", "content": prompt},
             ],
             max_tokens=max_tokens,
-            temperature=0.2,
+            temperature=config.IA_TEMPERATURE,
         )
         return respuesta["choices"][0]["message"]["content"].strip()
     except Exception as e:
@@ -121,30 +114,30 @@ def _extraer_json(texto: str) -> dict:
     return {}
 
 
-def analizar_iniciativa(titulo: str, texto: str, tipo: str) -> dict:
+def analizar_iniciativa(titulo: str, texto: str, tipo: str, grupos_disponibles=None) -> dict:
     """
     Analiza una iniciativa parlamentaria y devuelve:
     - resumen: 3-4 líneas en lenguaje claro
     - tematicas: lista de temas relevantes
     - posicion_grupos: posición estimada de cada grupo parlamentario
     """
+    if grupos_disponibles is None:
+        grupos_disponibles = config.GRUPOS_ANDALUCIA
+    
     # Recortar texto para no exceder el contexto
-    texto_recortado = texto[:3000] if len(texto) > 3000 else texto
+    texto_recortado = texto[:2000] if len(texto) > 2000 else texto
 
     tematicas_str = ", ".join(TEMATICAS_DISPONIBLES)
-    grupos_str = ", ".join(GRUPOS)
+    grupos_str = ", ".join(grupos_disponibles)
 
-    prompt = f"""Analiza esta iniciativa parlamentaria del Parlamento de Andalucía y devuelve ÚNICAMENTE un objeto JSON con esta estructura exacta:
+    prompt = f"""Analiza esta iniciativa parlamentaria y devuelve ÚNICAMENTE un objeto JSON con esta estructura exacta:
 
 {{
   "resumen": "Resumen en 3-4 líneas en lenguaje claro para cualquier ciudadano. Sin tecnicismos.",
   "tematicas": ["Tema1", "Tema2"],
   "posicion_grupos": {{
-    "PP-A": "A favor",
-    "PSOE-A": "En contra",
-    "Vox": "A favor",
-    "Por Andalucía": "En contra",
-    "Adelante Andalucía": "En contra"
+    "Grupo1": "A favor",
+    "Grupo2": "En contra"
   }}
 }}
 
@@ -152,12 +145,13 @@ Reglas:
 - "tematicas": elige entre estas opciones: {tematicas_str}. Máximo 3.
 - "posicion_grupos": para cada grupo usa "A favor", "En contra", "Abstención" o "Desconocido".
   Infiere la posición según la ideología del grupo y el contenido de la iniciativa.
-  PP-A y Vox suelen ser afines. PSOE-A, Por Andalucía y Adelante Andalucía suelen ser afines.
 
 INICIATIVA:
 Tipo: {tipo}
 Título: {titulo}
 Texto: {texto_recortado}
+
+Grupos a analizar: {grupos_str}
 
 JSON:"""
 
@@ -179,7 +173,7 @@ JSON:"""
     posicion_grupos = resultado.get("posicion_grupos", {})
     posiciones_validas = {"A favor", "En contra", "Abstención", "Desconocido"}
     posicion_limpia = {}
-    for grupo in GRUPOS:
+    for grupo in grupos_disponibles:
         pos = posicion_grupos.get(grupo, "Desconocido")
         posicion_limpia[grupo] = pos if pos in posiciones_validas else "Desconocido"
 

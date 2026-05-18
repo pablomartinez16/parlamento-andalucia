@@ -4,3 +4,4 @@ beautifulsoup4>=4.12
 lxml>=5.0
 llama-cpp-python>=0.2.90
 gunicorn>=21.0
+python-dotenv>=1.0
