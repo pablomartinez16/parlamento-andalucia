@@ -1,0 +1,20 @@
+# /etc/systemd/system/parlamento-webhook.service
+# Instalar con:
+#   sudo cp parlamento-webhook.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now parlamento-webhook
+
+[Unit]
+Description=Parlamento de Andalucía — Webhook de deploy automático
+After=network.target parlamento.service
+
+[Service]
+User=root
+WorkingDirectory=/opt/parlamento
+EnvironmentFile=/etc/parlamento.env
+ExecStart=/opt/parlamento/venv/bin/python /opt/parlamento/webhook.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
