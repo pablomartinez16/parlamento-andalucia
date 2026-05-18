@@ -323,14 +323,14 @@ def obtener_iniciativas(camara_id: int = None, tipo: str = None, estado: str = N
             params.append(tema)
         
         if q:
-            # Full-text search
-            query += """ AND i.id IN (
-                SELECT rowid FROM iniciativas_fts WHERE iniciativas_fts MATCH ?
-            )"""
-            params.append(q + "*")
+            # Búsqueda simple por título o resumen
+            query += " AND (i.titulo LIKE ? OR i.resumen LIKE ?)"
+            search_term = f"%{q}%"
+            params.extend([search_term, search_term])
         
         # Contar total
-        cur.execute(f"SELECT COUNT(DISTINCT i.id) FROM ({query})", params)
+        count_query = f"SELECT COUNT(DISTINCT i.id) FROM ({query})"
+        cur.execute(count_query, params)
         total = cur.fetchone()[0]
         
         # Paginar
