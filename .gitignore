@@ -1,0 +1,20 @@
+# Modelo IA (1.8 GB, no va a Git)
+models/
+
+# Datos generados por el scraper
+data/
+
+# Entorno virtual Python
+venv/
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Temporales
+*.tmp
+EOF
