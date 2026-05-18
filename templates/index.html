@@ -160,12 +160,41 @@
     footer{text-align:center;padding:20px 32px;border-top:1px solid var(--borde);font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--gris);letter-spacing:.08em}
     .sync-info{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--gris);margin-top:4px}
 
-    @media(max-width:900px){
-      .main{grid-template-columns:1fr;padding:16px}
-      .stats-bar{grid-template-columns:repeat(2,1fr)}
+    @media (max-width:900px){
+      /* Layout: stack main and sidebar */
+      .main{grid-template-columns:1fr;padding:16px;gap:18px}
+      .sidebar{order:2}
+      .stats-bar{grid-template-columns:repeat(2,1fr);gap:8px;padding:10px 16px}
       .header-top{padding:12px 16px}
-      .nav-filters{padding:0 16px}
-      .escanos-grid{grid-template-columns:repeat(2,minmax(110px,1fr))}
+      .brand{gap:10px}
+      .brand h1{font-size:1rem}
+      .legislature-badge{padding:6px 10px;font-size:.66rem}
+
+      /* Navigation: touch-friendly, horizontally scrollable */
+      .nav-filters{padding:6px 12px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+      .nav-filters button{padding:10px 14px;font-size:.95rem;border-radius:8px;min-width:80px}
+      .nav-filters button.active{background:rgba(255,255,255,.08)}
+
+      /* Toolbar: stack controls vertically */
+      .toolbar{flex-direction:column;align-items:stretch;gap:10px}
+      .search-box{order:0}
+      .search-box input{font-size:1rem;padding:12px 14px;border-radius:10px}
+      .filter-select{width:100%;padding:10px;border-radius:10px}
+
+      /* Cards and chips: larger touch targets */
+      .medida-card{border-radius:10px}
+      .escano-chip{padding:10px 12px}
+      .escanos-grid{grid-template-columns:repeat(2,minmax(110px,1fr));gap:10px}
+
+      /* Modal: full width on mobile */
+      .modal{max-width:96vw;padding:0;margin:0;border-radius:8px}
+      .modal-body{padding:16px}
+
+      /* Pagination and buttons larger for touch */
+      .pagination button{padding:10px 12px;font-size:.95rem}
+
+      /* Logo smaller */
+      .logo-parlamento{height:40px}
     }
   </style>
 </head>
