@@ -49,24 +49,6 @@ sudo -u parlamento /opt/parlamento/venv/bin/python /opt/parlamento/scraper.py
 
 Tardará 10-30 minutos la primera vez (descarga del modelo + scraping + análisis IA).
 
-## Nginx reverse proxy
-
-Copia el contenido de `parlamento.local.nginx` en tu VM de Nginx,
-reemplazando `IP-DE-LA-VM` por la IP real de la VM:
-
-```bash
-sudo cp parlamento.local.nginx /etc/nginx/sites-available/parlamento.local
-# Editar y poner la IP correcta:
-sudo nano /etc/nginx/sites-available/parlamento.local
-sudo ln -s /etc/nginx/sites-available/parlamento.local /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-```
-
-En tu router/DNS local añade:
-```
-parlamento.local → IP de tu VM Nginx
-```
-
 ## Acceso con Tailscale
 
 ```bash
@@ -75,7 +57,7 @@ sudo tailscale up
 ```
 
 Desde cualquier dispositivo con Tailscale activo puedes acceder
-a `http://parlamento.local` o a la IP Tailscale de tu Nginx.
+a `http://parlamento.local:5000` o a la IP Tailscale de tu Nginx.
 
 ## Consumo de recursos (4 GB RAM)
 
