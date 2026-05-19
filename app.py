@@ -53,8 +53,13 @@ def congreso():
     return render_template("congreso.html")
 
 
+@app.route("/parlamento")
+def parlamento_new():
+    return render_template("andalucia.html")
+
+
 @app.route("/andalucia")
-def andalucia():
+def parlamento():
     return render_template("andalucia.html")
 
 
