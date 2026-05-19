@@ -98,7 +98,7 @@ async function cargarIniciativas() {
         const data = await response.json();
         
         mostrarIniciativas(data.datos);
-        actualizar Paginacion(data);
+        actualizarPaginacion(data);
     } catch (error) {
         console.error('Error cargando iniciativas:', error);
         document.getElementById('iniciativas-container').innerHTML = 
