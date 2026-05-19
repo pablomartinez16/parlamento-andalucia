@@ -48,22 +48,30 @@ chmod 755 "$INSTALL_DIR"
 ok "Archivos copiados en $INSTALL_DIR"
 
 section "4/7 Creando entorno virtual Python e instalando dependencias"
-info "Esto puede tardar varios minutos (llama-cpp-python compila desde fuente)..."
+info "Instalando dependencias Python..."
 sudo -u "$APP_USER" python3 -m venv "$INSTALL_DIR/venv"
 
-# llama-cpp-python: compilar para CPU (sin GPU)
 sudo -u "$APP_USER" bash -c "
     source $INSTALL_DIR/venv/bin/activate
-    pip install --upgrade pip -q
-    CMAKE_ARGS='-DLLAMA_BLAS=OFF' pip install llama-cpp-python --no-cache-dir -q
+    pip install --upgrade pip setuptools wheel -q
     pip install -r $INSTALL_DIR/requirements.txt -q
 "
-ok "Dependencias Python instaladas"
+ok "Dependencias Python instaladas (sin llama-cpp-python - usando cache simple)"
 
-section "5/7 Descargando modelo Phi-3-mini (primera ejecución)"
-info "El modelo (~1.8 GB) se descarga la primera vez que corra el scraper."
-info "Para descargarlo ahora ejecuta:"
-echo -e "  ${YELLOW}sudo -u $APP_USER $INSTALL_DIR/venv/bin/python -c \"from ia import _get_llm; _get_llm()\"${NC}"
+section "5/7 Inicializando base de datos"
+sudo -u "$APP_USER" bash -c "
+    source $INSTALL_DIR/venv/bin/activate
+    cd $INSTALL_DIR
+    python3 -c \"
+import db
+db.init_db()
+db.cargar_camaras_defecto()
+print('✓ Base de datos inicializada')
+print('✓ Cámaras cargadas')
+print('✓ Grupos parlamentarios cargados')
+    \"
+"
+ok "Base de datos lista con esquema + cámaras + grupos"
 
 section "6/7 Configurando servicio systemd"
 cp "$INSTALL_DIR/parlamento.service" /etc/systemd/system/parlamento.service
@@ -74,22 +82,23 @@ sed -i "s|User=parlamento|User=$APP_USER|g" /etc/systemd/system/parlamento.servi
 systemctl daemon-reload
 systemctl enable parlamento
 systemctl start parlamento
-ok "Servicio 'parlamento' activo"
+ok "Servicio 'parlamento' activo y habilitado"
 
 section "7/7 Configurando cron del scraper"
-CRON_LINE="0 3 * * * $INSTALL_DIR/venv/bin/python $INSTALL_DIR/scraper.py >> $INSTALL_DIR/scraper.log 2>&1"
-(crontab -u "$APP_USER" -l 2>/dev/null | grep -v scraper.py; echo "$CRON_LINE") \
+CRON_LINE="0 3 * * * $INSTALL_DIR/venv/bin/python3 $INSTALL_DIR/congreso_diputados_scraper.py >> $INSTALL_DIR/scraper.log 2>&1"
+(crontab -u "$APP_USER" -l 2>/dev/null | grep -v "congreso_diputados_scraper.py"; echo "$CRON_LINE") \
     | crontab -u "$APP_USER" -
-ok "Cron configurado (diario a las 03:00)"
+ok "Cron configurado (diario a las 03:00 UTC)"
 
 # ── Resumen final ────────────────────────────────────────────────
 IP_VM=$(hostname -I | awk '{print $1}')
 echo ""
 echo -e "${BOLD}╔══════════════════════════════════════════════════════╗${NC}"
-echo -e "${BOLD}║           Instalación completada                     ║${NC}"
+echo -e "${BOLD}║           Instalación completada ✓                  ║${NC}"
 echo -e "${BOLD}╠══════════════════════════════════════════════════════╣${NC}"
 echo -e "${BOLD}║${NC}  Web local:    ${GREEN}http://$IP_VM:5000${NC}"
 echo -e "${BOLD}║${NC}  Datos:        ${INSTALL_DIR}/data/"
+echo -e "${BOLD}║${NC}  BD:           ${INSTALL_DIR}/data/legislativo.db"
 echo -e "${BOLD}║${NC}  Logs web:     ${INSTALL_DIR}/gunicorn.log"
 echo -e "${BOLD}║${NC}  Logs scraper: ${INSTALL_DIR}/scraper.log"
 echo -e "${BOLD}╠══════════════════════════════════════════════════════╣${NC}"
@@ -98,6 +107,12 @@ echo -e "${BOLD}║${NC}  ${YELLOW}proxy_pass http://$IP_VM:5000;${NC}"
 echo -e "${BOLD}║${NC}  (usa el fichero parlamento.local.nginx de guía)"
 echo -e "${BOLD}╠══════════════════════════════════════════════════════╣${NC}"
 echo -e "${BOLD}║${NC}  Para ejecutar el scraper ahora:"
-echo -e "${BOLD}║${NC}  ${YELLOW}sudo -u $APP_USER $INSTALL_DIR/venv/bin/python $INSTALL_DIR/scraper.py${NC}"
+echo -e "${BOLD}║${NC}  ${YELLOW}sudo -u $APP_USER $INSTALL_DIR/venv/bin/python3 \\${NC}"
+echo -e "${BOLD}║${NC}  ${YELLOW}  $INSTALL_DIR/congreso_diputados_scraper.py${NC}"
+echo -e "${BOLD}║${NC}"
+echo -e "${BOLD}║${NC}  Para borrar datos y hacer scrape limpio:"
+echo -e "${BOLD}║${NC}  ${YELLOW}rm $INSTALL_DIR/data/legislativo.db${NC}"
+echo -e "${BOLD}║${NC}  ${YELLOW}sudo -u $APP_USER $INSTALL_DIR/venv/bin/python3 \\${NC}"
+echo -e "${BOLD}║${NC}  ${YELLOW}  $INSTALL_DIR/congreso_diputados_scraper.py${NC}"
 echo -e "${BOLD}╚══════════════════════════════════════════════════════╝${NC}"
 echo ""

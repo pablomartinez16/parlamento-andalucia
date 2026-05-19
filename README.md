@@ -1,37 +1,37 @@
 # Seguimiento Legislativo de España 
 
-**Plataforma unificada de seguimiento de iniciativas legislativas con IA local en Congreso de Diputados y Parlamento de Andalucía.**
+**Plataforma unificada de seguimiento de iniciativas legislativas con caché rápido para Congreso de Diputados y Parlamento de Andalucía.**
 
 ## 🎯 Características
 
 - ✅ **Scraping automático** de Congreso de Diputados + Parlamento de Andalucía
-- 🤖 **IA local** (TinyLlama 1.1B) para análisis y resúmenes inteligentes
+- ⚡ **Caché inteligente** de resúmenes y análisis (muy rápido, sin IA pesada)
 - 💾 **Base de datos SQLite** con búsqueda full-text
 - 🚀 **Actualización automática** via webhook GitHub (sin intervención)
-- 📊 **Dashboard responsivo** con filtros y estadísticas
-- 🔒 **Bajo consumo** (~450 MB idle, 3.5 GB pico en VM 4GB)
+- 📊 **Dashboard responsivo** con filtros, estadísticas y posiciones de partidos
+- 📋 **Posiciones de partidos** - Ve quién apoya o rechaza cada medida
+- 🔒 **Bajo consumo** (~350 MB idle, ~800 MB máximo en VM 4GB)
 
 ## 📋 Estructura del Proyecto
 
 ```
 seguimiento-legislativo-es/
 ├── app.py                      # Flask — API + servidor web
-├── db.py                       # Gestión SQLite
+├── db.py                       # Gestión SQLite con temáticas y posiciones
 ├── config.py                   # Configuración centralizada
-├── ia.py                       # IA local con TinyLlama
+├── ia.py                       # Análisis rápido con caché (sin modelos grandes)
 ├── updater.py                  # Sistema auto-actualización
+├── congreso_diputados_scraper.py    # Scraper Congreso (auto-detect JSON)
 ├── parlamento_andalucia_scraper.py  # Scraper Parlamento Andalucía
-├── congreso_diputados_scraper.py    # Scraper Congreso de Diputados
 ├── requirements.txt
 ├── install.sh                  # Instalación automática
 ├── parlamento.service          # Systemd service (Flask)
-├── scraper.cron               # Entrada crontab para scrapers
-├── data/                      # BD y logs (generados)
-├── models/                    # Modelos IA (descarga automática)
+├── data/                       # BD y logs (generados)
 ├── templates/
 │   ├── index.html             # Dashboard principal
 │   ├── congreso.html          # Vista Congreso
-│   └── andalucia.html         # Vista Parlamento Andalucía
+│   ├── andalucia.html         # Vista Parlamento Andalucía
+│   └── api_docs.html          # Documentación API
 └── static/                    # CSS, JS, assets
 ```
 
@@ -39,37 +39,42 @@ seguimiento-legislativo-es/
 
 ```bash
 # 1. Clonar repositorio
-git clone https://github.com/pablomartinez16/seguimiento-legislativo-es.git
-cd seguimiento-legislativo-es
+git clone https://github.com/pablomartinez16/parlamento-andalucia.git
+cd parlamento-andalucia
 
-# 2. Ejecutar instalador
+# 2. Ejecutar instalador (instala todo, inicia servicios)
 sudo bash install.sh
 ```
 
 El instalador:
 - Crea usuario `parlamento` (sin root)
-- Instala Python 3.10+, pip, dependencias del sistema
-- Crea virtualenv y instala paquetes Python
-- Configura servicio systemd (autostart en reinicio)
-- Configura cron para scrapers (3:00 y 4:00 UTC)
+- Instala Python 3.10+, pip, dependencias
+- Crea virtualenv con todos los paquetes
+- Inicializa BD, cámaras y grupos parlamentarios
+- Configura servicio systemd (autostart)
+- Configura cron para scrapers (3:00 UTC diario)
 
 ## 📖 Primera Ejecución
 
 ```bash
-# Descargar modelo TinyLlama (~700 MB) y ejecutar scraper:
-sudo -u parlamento /opt/seguimiento-legislativo/venv/bin/python \
-  /opt/seguimiento-legislativo/parlamento_andalucia_scraper.py
+# El servicio web ya está activo en http://localhost:5000
 
-sudo -u parlamento /opt/seguimiento-legislativo/venv/bin/python \
-  /opt/seguimiento-legislativo/congreso_diputados_scraper.py
+# Para ejecutar el scraper manualmente:
+sudo -u parlamento /opt/parlamento/venv/bin/python3 \
+  /opt/parlamento/congreso_diputados_scraper.py
+
+# Borrar datos y hacer scrape limpio:
+rm /opt/parlamento/data/legislativo.db
+sudo -u parlamento /opt/parlamento/venv/bin/python3 \
+  /opt/parlamento/congreso_diputados_scraper.py
 ```
 
-Tardará 15-30 minutos la primera vez (descarga modelo + scraping + análisis IA).
+Tardará 5-15 minutos según cantidad de iniciativas (muy rápido, sin esperar IA).
 
 ## 🌐 Acceso a la Web
 
 ```bash
-# Local
+# Local (en la VM)
 http://localhost:5000
 
 # Con Tailscale (privada)
@@ -77,46 +82,59 @@ sudo tailscale up
 http://parlamento.local:5000
 
 # Con Cloudflare Tunnel (pública)
-cloudflared tunnel create seguimiento-legislativo
-# Configurar CNAME en tu dominio
+cloudflared tunnel create seguimiento
 ```
 
 ## 📊 API REST
+
+### Documentación interactiva
+```bash
+http://localhost:5000/api
+```
 
 ### Estadísticas por cámara
 
 ```bash
 curl "http://localhost:5000/api/stats?camara=Congreso%20de%20Diputados"
-curl "http://localhost:5000/api/stats?camara=Parlamento%20de%20Andaluc%C3%ADa"
 ```
 
 Respuesta:
 ```json
 {
   "camara": "Congreso de Diputados",
-  "total": 1250,
-  "aprobada": 340,
-  "rechazada": 180,
-  "pendiente": 730,
+  "total": 250,
+  "estados": {
+    "aprobada": 85,
+    "pendiente": 165
+  },
   "tematicas": {
-    "Economía": 245,
-    "Sanidad": 189,
-    ...
+    "Sanidad": 45,
+    "Educación": 38,
+    "Economía": 32
   }
 }
 ```
 
-### Buscar iniciativas
+### Buscar iniciativas con posiciones de partidos
 
 ```bash
-# Filtros: camara, tipo, estado, tema, q (búsqueda), pagina, por_pagina
-curl "http://localhost:5000/api/iniciativas?camara=Congreso%20de%20Diputados&estado=aprobada&por_pagina=5"
+curl "http://localhost:5000/api/iniciativas?camara=Congreso%20de%20Diputados&pagina=1&por_pagina=10"
 ```
 
-### Temáticas disponibles
-
-```bash
-curl "http://localhost:5000/api/tematicas?camara=Congreso%20de%20Diputados"
+Cada iniciativa devuelve:
+```json
+{
+  "id": 1,
+  "titulo": "Reforma de la Ley Orgánica del Poder Judicial",
+  "resumen": "Proposición de Ley que reforma...",
+  "tematicas": ["Justicia", "Administración pública"],
+  "posicion_grupos": {
+    "Grupo Socialista": "A favor",
+    "Grupo Popular": "En contra",
+    "Podemos": "A favor",
+    "Ciudadanos": "Abstención"
+  }
+}
 ```
 
 ## ⚙️ Actualización Automática (Webhook)
@@ -130,21 +148,18 @@ curl "http://localhost:5000/api/tematicas?camara=Congreso%20de%20Diputados"
 
 2. **Variables de entorno (.env o systemd):**
    ```
-   WEBHOOK_SECRET=tu-secreto-super-seguro
-   GITHUB_REPO=usuario/seguimiento-legislativo-es
+   WEBHOOK_SECRET=tu-secreto-seguro
+   GITHUB_REPO=pablomartinez16/parlamento-andalucia
    LOG_LEVEL=INFO
    ```
 
 3. **Flujo automático:**
-   - Push a `main` → GitHub webhook
-   - `POST /webhook/update`
-   - Git pull automático
-   - pip install (si cambió requirements.txt)
-   - systemctl restart parlamento
+   - Push a `main` → Webhook automático
+   - Git pull + pip install + systemctl restart
    - Logs en BD
 
-**Ver estado de actualizaciones:**
 ```bash
+# Ver estado de actualizaciones
 curl http://localhost:5000/api/system/status
 ```
 
@@ -153,35 +168,35 @@ curl http://localhost:5000/api/system/status
 | Componente | RAM | Notas |
 |------------|-----|-------|
 | Flask/Gunicorn | ~100 MB | Siempre |
-| TinyLlama (idle) | ~400 MB | Entre scrapers |
-| TinyLlama (scraping) | ~700 MB | Solo 3:00-4:30 UTC |
 | SQLite + índices | ~50 MB | Siempre |
+| Caché en memoria | ~10 MB | Siempre |
 | Sistema OS | ~300 MB | Ubuntu |
-| **Total idle** | **~850 MB** | ✅ Seguro en 4GB |
-| **Total pico** | **~3.5 GB** | ✅ Cómodo en 4GB |
+| **Total idle** | **~350 MB** | ✅ Muy eficiente |
+| **Total scraping** | **~800 MB** | ✅ Cómodo en 4GB |
+
+Sin modelos de IA pesados, es muy ligero.
 
 ## 📝 Configuración
 
 Editar `config.py`:
 
 ```python
-# IA
-IA_MODEL = "TinyLlama-1.1B-Chat-v1.0"
-IA_CONTEXT_SIZE = 2048
-IA_TEMPERATURE = 0.2
-
 # Scraping
 SCRAPER_TIMEOUT = 30
 SCRAPER_DELAY = 2  # segundos entre peticiones
-SCRAPER_RETRY_COUNT = 3
 
 # Cron (formato crontab)
-SCRAPER_SCHEDULE_CONGRESO = "0 4 * * *"  # 04:00 UTC
-SCRAPER_SCHEDULE_ANDALUCIA = "0 3 * * *"  # 03:00 UTC
+SCRAPER_SCHEDULE_CONGRESO = "0 3 * * *"  # 03:00 UTC diario
 
 # Flask
 FLASK_PORT = 5000
 API_ITEMS_PER_PAGE = 20
+
+# Cámaras
+CAMARAS = {
+    "Congreso de Diputados": {...},
+    "Parlamento de Andalucía": {...}
+}
 ```
 
 ## 🛠️ Comandos Útiles
@@ -194,111 +209,89 @@ sudo systemctl status parlamento
 sudo journalctl -u parlamento -f
 
 # Ver logs del scraper
-tail -f /opt/seguimiento-legislativo/data/legislativo.log
+tail -f /opt/parlamento/scraper.log
 
 # Ejecutar scraper manualmente
-sudo -u parlamento /opt/seguimiento-legislativo/venv/bin/python \
-  /opt/seguimiento-legislativo/parlamento_andalucia_scraper.py
+sudo -u parlamento /opt/parlamento/venv/bin/python3 \
+  /opt/parlamento/congreso_diputados_scraper.py
 
 # Reiniciar después de cambios
 sudo systemctl restart parlamento
 
-# Ver actualizaciones automáticas
-sqlite3 /opt/seguimiento-legislativo/data/legislativo.db \
-  "SELECT * FROM update_log ORDER BY timestamp DESC LIMIT 10;"
+# Ver iniciativas en BD
+sqlite3 /opt/parlamento/data/legislativo.db \
+  "SELECT COUNT(*) FROM iniciativas;"
+
+# Ver posiciones de partidos
+sqlite3 /opt/parlamento/data/legislativo.db \
+  "SELECT g.nombre, COUNT(*) FROM posiciones p \
+   JOIN grupos g ON p.grupo_id = g.id GROUP BY g.nombre;"
 ```
 
-## 🔄 Migración desde parlamento-andalucia (anterior)
+## 🔄 Cómo Funciona el Caché Rápido
 
-Si usabas la anterior versión con JSON:
+1. **Primera ejecución:** Se analiza el título + tipo → genera resumen simple + temáticas
+2. **Siguientes ejecuciones:** Si el título ya se vio, devuelve del caché inmediatamente
+3. **Posiciones de partidos:** Se asignan por defecto (Desconocido) - se pueden actualizar manualmente
 
-```bash
-# Backup de antiguo repositorio
-cp -r ~/parlamento-andalucia ~/parlamento-andalucia.backup
-
-# Clonar nuevo repo
-git clone https://github.com/pablomartinez16/seguimiento-legislativo-es.git
-
-# La BD SQLite se generará automáticamente en la primera ejecución
-# Los datos antiguos (JSON) no se importan automáticamente
-```
+Resultado: **10-20x más rápido** que con IA pesada.
 
 ## 📞 Troubleshooting
 
-**"Cámara no encontrada"**
+**"Base de datos no existe"**
 ```bash
-# Verificar cámaras en BD
-sqlite3 /opt/seguimiento-legislativo/data/legislativo.db \
-  "SELECT * FROM camaras;"
+# Recrearla
+rm /opt/parlamento/data/legislativo.db
+python3 -c "import db; db.init_db(); db.cargar_camaras_defecto()"
 ```
 
-**Modelo TinyLlama no descarga**
+**"Grupos no aparecen en API"**
 ```bash
-# Descargar manualmente
-pip install llama-cpp-python
-python -c "import ia; ia._get_llm()"
+# Verificar que existen
+sqlite3 /opt/parlamento/data/legislativo.db \
+  "SELECT COUNT(*) FROM grupos;"
 
-# El modelo se guardará en: models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf (~700 MB)
+# Si es 0, cargar defecto
+python3 -c "import db; db.cargar_camaras_defecto()"
 ```
 
-**Error de sintaxis después de webhook**
-```bash
-# Ver log de actualización
-curl http://localhost:5000/api/system/status | jq '.ultimas_actualizaciones'
-
-# Si hay error, rollback manual
-cd /opt/seguimiento-legislativo
-git log --oneline | head -5
-git revert <commit-hash>
-```
+**Scraper muy lento**
+- Reducir `SCRAPER_DELAY` en `config.py` (por defecto 2s)
+- Reducir `API_ITEMS_PER_PAGE` para paginar menos
 
 ## 🔐 Seguridad
 
 - ✅ Validación HMAC en webhooks
-- ✅ Ejecución sin root (usuario `parlamento`)
-- ✅ Timeout en requests (30 seg)
-- ✅ Sanitización de inputs en API
+- ✅ Ejecución sin root
+- ✅ Timeout en requests
+- ✅ Sanitización de inputs
 - ✅ No almacena credenciales en código
-
-**Recomendaciones:**
-- Usar Cloudflare Tunnel para acceso público
-- Cambiar `WEBHOOK_SECRET` en producción
-- Restringir firewall a IPs de GitHub
-- Usar HTTPS siempre
-- Backup automático de BD (cron)
 
 ## 📚 Desarrollo
 
 ```bash
-# Instalar en modo desarrollo
-python -m venv venv
+# Setup
+python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-# Ejecutar tests (si los hay)
-pytest
+# Inicializar BD local
+python3 -c "import db; db.init_db(); db.cargar_camaras_defecto()"
 
-# Formato de código
-black *.py
-
-# Verificar sintaxis
-python -m py_compile *.py
+# Ejecutar Flask
+python3 app.py
 ```
 
 ## 📄 Licencia
 
-MIT License — Libre para uso personal, educativo y comercial.
+MIT License
 
 ## 🤝 Contribuir
 
-Pull requests bienvenidos. Para cambios importantes, abre un issue primero.
-
-## 📞 Contacto
-
-- Issues: [GitHub Issues](https://github.com/pablomartinez16/seguimiento-legislativo-es/issues)
-- Email: pablo@ejemplo.es (reemplazar)
+Pull requests bienvenidos.
 
 ---
 
 **Última actualización:** Mayo 2026  
-**Versión:** 2.0.0 (Refactor SQLite + TinyLlama + Auto-update)
+**Versión:** 2.1.0 (Caché rápido + Posiciones de partidos)
+
