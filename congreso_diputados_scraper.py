@@ -108,24 +108,28 @@ def procesar_iniciativa(iniciativa: dict, camara_id: int) -> bool:
     """
     try:
         # Extraer campos del JSON
-        titulo = iniciativa.get("OBJETO", "").strip()
+        titulo = (
+            iniciativa.get("TITULO_LEY", "") or 
+            iniciativa.get("OBJETO", "")
+        ).strip()
         if not titulo:
             return False
         
-        # Intentar obtener número de expediente de varios campos posibles
+        # Coger el PDF directamente del JSON
+        url = iniciativa.get("PDF", "")
+        if not url:
+            log.debug(f"  ⚠️  Sin URL de PDF: {titulo[:60]}")
+            return False
+        
+        # Extraer número de expediente de varios campos posibles
         num_expediente = (
             iniciativa.get("NUMEXPEDIENTE", "") or 
             iniciativa.get("NUM_EXPEDIENTE", "") or
             iniciativa.get("EXPEDIENTE", "") or
+            iniciativa.get("NUMERO_LEY", "") or
             ""
         )
         
-        # Si no hay número de expediente, no procesamos
-        if not num_expediente:
-            log.debug(f"  ⚠️  Sin número de expediente: {titulo[:60]}")
-            return False
-        
-        url = f"https://www.congreso.es/es/busqueda?expediente={num_expediente}"
         tipo = iniciativa.get("TIPO", "").split()[0] if iniciativa.get("TIPO") else ""
         estado = mapear_estado(iniciativa.get("SITUACIONACTUAL", ""))
         fecha = iniciativa.get("FECHAPRESENTACION", "")
