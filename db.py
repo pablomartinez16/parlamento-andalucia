@@ -299,38 +299,46 @@ def obtener_iniciativas(camara_id: int = None, tipo: str = None, estado: str = N
         cur = conn.cursor()
         
         query = "SELECT DISTINCT i.* FROM iniciativas i"
+        count_query = "SELECT COUNT(DISTINCT i.id) FROM iniciativas i"
         params = []
         
         if tema:
             query += " JOIN tematicas t ON i.id = t.iniciativa_id"
+            count_query += " JOIN tematicas t ON i.id = t.iniciativa_id"
         
         query += " WHERE 1=1"
+        count_query += " WHERE 1=1"
         
         if camara_id:
             query += " AND i.camara_id = ?"
+            count_query += " AND i.camara_id = ?"
             params.append(camara_id)
         if tipo:
             query += " AND i.tipo = ?"
+            count_query += " AND i.tipo = ?"
             params.append(tipo)
         if estado:
             query += " AND i.estado = ?"
+            count_query += " AND i.estado = ?"
             params.append(estado)
         if grupo:
             query += " AND i.grupo_autor = ?"
+            count_query += " AND i.grupo_autor = ?"
             params.append(grupo)
         if tema:
             query += " AND t.tema = ?"
+            count_query += " AND t.tema = ?"
             params.append(tema)
         
         if q:
             # Búsqueda simple por título o resumen
             query += " AND (i.titulo LIKE ? OR i.resumen LIKE ?)"
+            count_query += " AND (i.titulo LIKE ? OR i.resumen LIKE ?)"
             search_term = f"%{q}%"
             params.extend([search_term, search_term])
         
-        # Contar total
-        count_query = f"SELECT COUNT(DISTINCT i.id) FROM ({query})"
-        cur.execute(count_query, params)
+        # Contar total (ejecutar con copia de params)
+        cur.execute(count_query, params[:len(params)])
         total = cur.fetchone()[0]
         
         # Paginar
