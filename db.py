@@ -269,8 +269,47 @@ def obtener_iniciativa(id_iniciativa: int) -> dict:
         return dict(cur.fetchone()) if cur.fetchone() else None
 
 
+def iniciativa_existe(camara_id: int, numero: str = None, url: str = None) -> int:
+    """Verifica si iniciativa ya existe. Retorna ID si existe, None si no."""
+    if not numero and not url:
+        return None
+    
+    with get_db() as conn:
+        cur = conn.cursor()
+        
+        # Buscar por número si disponible
+        if numero:
+            cur.execute(
+                "SELECT id FROM iniciativas WHERE camara_id = ? AND numero = ?",
+                (camara_id, numero)
+            )
+            row = cur.fetchone()
+            if row:
+                return row[0]
+        
+        # Buscar por URL si disponible
+        if url:
+            cur.execute(
+                "SELECT id FROM iniciativas WHERE camara_id = ? AND url = ?",
+                (camara_id, url)
+            )
+            row = cur.fetchone()
+            if row:
+                return row[0]
+    
+    return None
+
+
 def insertar_iniciativa(camara_id: int, datos: dict) -> int:
-    """Inserta nueva iniciativa. Retorna el ID."""
+    """Inserta nueva iniciativa. Retorna el ID, o None si ya existe."""
+    numero = datos.get("numero")
+    url = datos.get("url")
+    
+    # Verificar si ya existe
+    existente = iniciativa_existe(camara_id, numero, url)
+    if existente:
+        return existente
+    
     with get_db() as conn:
         cur = conn.cursor()
         try:
@@ -282,9 +321,9 @@ def insertar_iniciativa(camara_id: int, datos: dict) -> int:
             """, (
                 camara_id,
                 datos.get("tipo"),
-                datos.get("numero"),
+                numero,
                 datos.get("titulo"),
-                datos.get("url"),
+                url,
                 datos.get("estado", "pendiente"),
                 datos.get("fecha_presentacion"),
                 datos.get("grupo_autor"),
@@ -329,7 +368,7 @@ def insertar_iniciativa(camara_id: int, datos: dict) -> int:
             conn.commit()
             return iniciativa_id
         except sqlite3.IntegrityError as e:
-            log.warning(f"Iniciativa ya existe: {e}")
+            log.warning(f"Error insertando iniciativa (constraint): {e}")
             return None
 
 
