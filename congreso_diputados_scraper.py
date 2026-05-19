@@ -115,6 +115,20 @@ def procesar_iniciativa(iniciativa: dict, camara_id: int) -> bool:
         if not titulo:
             return False
         
+        # Filtrar por fecha: solo 2026 en adelante
+        fecha_str = iniciativa.get("FECHAPRESENTACION", "") or iniciativa.get("FECHA_LEY", "")
+        if fecha_str:
+            try:
+                # Formato esperado: DD/MM/YYYY
+                partes = fecha_str.split("/")
+                if len(partes) == 3:
+                    year = int(partes[2])
+                    if year < 2026:
+                        log.debug(f"  ⊘ Saltando iniciativa antigua ({year}): {titulo[:60]}")
+                        return False
+            except (ValueError, IndexError):
+                pass
+        
         # Coger el PDF de varios campos posibles
         url = (
             iniciativa.get("PDF", "") or 
