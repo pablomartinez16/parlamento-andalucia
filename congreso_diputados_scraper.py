@@ -115,8 +115,12 @@ def procesar_iniciativa(iniciativa: dict, camara_id: int) -> bool:
         if not titulo:
             return False
         
-        # Coger el PDF directamente del JSON
-        url = iniciativa.get("PDF", "")
+        # Coger el PDF de varios campos posibles
+        url = (
+            iniciativa.get("PDF", "") or 
+            iniciativa.get("ENLACESBOCG", "") or
+            ""
+        )
         if not url:
             log.debug(f"  ⚠️  Sin URL de PDF: {titulo[:60]}")
             return False
