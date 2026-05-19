@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - Seguimiento Legislativo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <style>
+        body {
+            background: #f8f9fa;
+            padding-top: 20px;
+        }
+        .api-endpoint {
+            background: white;
+            border-left: 4px solid #0f766e;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .method-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-right: 10px;
+        }
+        .method-get { background: #e3f2fd; color: #1976d2; }
+        .method-post { background: #f3e5f5; color: #7b1fa2; }
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            background: #f5f5f5;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .params-table {
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+        .example-request {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .example-response {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .header-title {
+            color: #0f766e;
+            border-bottom: 2px solid #0f766e;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-lg">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <h1 class="mb-2">📚 API Documentation</h1>
+                <p class="text-muted mb-4">Seguimiento Legislativo Español - REST API v1.0</p>
+
+                <!-- Overview -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title header-title">Overview</h5>
+                        <p>Esta API proporciona acceso a información sobre iniciativas legislativas del Congreso de Diputados y el Parlamento de Andalucía.</p>
+                        <p><strong>URL Base:</strong> <code>http://localhost:5000</code></p>
+                        <p><strong>Formato:</strong> JSON</p>
+                    </div>
+                </div>
+
+                <!-- Cámaras disponibles -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title header-title">Cámaras Disponibles</h5>
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr>
+                                    <td><code>Congreso de Diputados</code></td>
+                                    <td>Cámara nacional del congreso español</td>
+                                </tr>
+                                <tr>
+                                    <td><code>Parlamento de Andalucía</code></td>
+                                    <td>Parlamento autonómico de Andalucía</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Estadísticas -->
+                <div class="api-endpoint">
+                    <div class="mb-3">
+                        <span class="method-badge method-get">GET</span>
+                        <span class="endpoint-path">/api/stats</span>
+                    </div>
+                    <p>Obtiene estadísticas generales de una cámara legislativa.</p>
+                    
+                    <h6 class="mt-4">Parámetros:</h6>
+                    <table class="table table-sm params-table">
+                        <thead>
+                            <tr>
+                                <th>Parámetro</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                                <th>Defecto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>camara</code></td>
+                                <td>string</td>
+                                <td>Nombre de la cámara</td>
+                                <td>Congreso de Diputados</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h6 class="mt-4">Ejemplo:</h6>
+                    <div class="example-request">GET /api/stats?camara=Congreso%20de%20Diputados</div>
+                    
+                    <h6 class="mt-3">Respuesta:</h6>
+                    <div class="example-response"><pre>{
+  "camara": "Congreso de Diputados",
+  "total": 244,
+  "estados": {
+    "aprobada": 120,
+    "rechazada": 45,
+    "pendiente": 79
+  },
+  "ultima_actualizacion": "2026-05-19T10:30:00.000000"
+}</pre></div>
+                </div>
+
+                <!-- Iniciativas -->
+                <div class="api-endpoint">
+                    <div class="mb-3">
+                        <span class="method-badge method-get">GET</span>
+                        <span class="endpoint-path">/api/iniciativas</span>
+                    </div>
+                    <p>Lista iniciativas legislativas con filtros y paginación.</p>
+                    
+                    <h6 class="mt-4">Parámetros:</h6>
+                    <table class="table table-sm params-table">
+                        <thead>
+                            <tr>
+                                <th>Parámetro</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                                <th>Defecto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>camara</code></td>
+                                <td>string</td>
+                                <td>Nombre de la cámara</td>
+                                <td>Congreso de Diputados</td>
+                            </tr>
+                            <tr>
+                                <td><code>pagina</code></td>
+                                <td>integer</td>
+                                <td>Número de página (desde 1)</td>
+                                <td>1</td>
+                            </tr>
+                            <tr>
+                                <td><code>por_pagina</code></td>
+                                <td>integer</td>
+                                <td>Items por página (máx. 100)</td>
+                                <td>20</td>
+                            </tr>
+                            <tr>
+                                <td><code>estado</code></td>
+                                <td>string</td>
+                                <td>Filtrar por estado (aprobada, rechazada, pendiente, retirada)</td>
+                                <td>ninguno</td>
+                            </tr>
+                            <tr>
+                                <td><code>tipo</code></td>
+                                <td>string</td>
+                                <td>Filtrar por tipo de iniciativa</td>
+                                <td>ninguno</td>
+                            </tr>
+                            <tr>
+                                <td><code>grupo</code></td>
+                                <td>string</td>
+                                <td>Filtrar por grupo autor</td>
+                                <td>ninguno</td>
+                            </tr>
+                            <tr>
+                                <td><code>tema</code></td>
+                                <td>string</td>
+                                <td>Filtrar por temática</td>
+                                <td>ninguno</td>
+                            </tr>
+                            <tr>
+                                <td><code>q</code></td>
+                                <td>string</td>
+                                <td>Búsqueda por palabra clave (título o resumen)</td>
+                                <td>ninguno</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h6 class="mt-4">Ejemplo:</h6>
+                    <div class="example-request">GET /api/iniciativas?camara=Congreso%20de%20Diputados&estado=aprobada&pagina=1&por_pagina=10</div>
+                    
+                    <h6 class="mt-3">Respuesta:</h6>
+                    <div class="example-response"><pre>{
+  "datos": [
+    {
+      "id": 1,
+      "numero": "122/000001/0000",
+      "titulo": "Proposición de Ley...",
+      "tipo": "Proposición",
+      "estado": "aprobada",
+      "resumen": "Iniciativa que busca...",
+      "fecha_presentacion": "29/08/2023",
+      "grupo_autor": "Grupo Parlamentario Vasco",
+      "url": "https://www.congreso.es/public_oficiales/...",
+      "tematicas": ["Justicia", "Reforma"],
+      "created_at": "2026-05-19T08:30:00",
+      "updated_at": "2026-05-19T08:30:00"
+    }
+  ],
+  "pagina": 1,
+  "paginas": 25,
+  "total": 244
+}</pre></div>
+                </div>
+
+                <!-- Estados -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title header-title">Estados de Iniciativas</h5>
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr>
+                                    <td><code>aprobada</code></td>
+                                    <td>Iniciativa aprobada</td>
+                                </tr>
+                                <tr>
+                                    <td><code>rechazada</code></td>
+                                    <td>Iniciativa rechazada</td>
+                                </tr>
+                                <tr>
+                                    <td><code>pendiente</code></td>
+                                    <td>Iniciativa en tramitación</td>
+                                </tr>
+                                <tr>
+                                    <td><code>retirada</code></td>
+                                    <td>Iniciativa retirada</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Códigos de Error -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title header-title">Códigos de Error</h5>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Descripción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>200</code></td>
+                                    <td>OK - Solicitud exitosa</td>
+                                </tr>
+                                <tr>
+                                    <td><code>400</code></td>
+                                    <td>Bad Request - Cámara no encontrada o parámetros inválidos</td>
+                                </tr>
+                                <tr>
+                                    <td><code>404</code></td>
+                                    <td>Not Found - Endpoint no encontrado</td>
+                                </tr>
+                                <tr>
+                                    <td><code>500</code></td>
+                                    <td>Internal Server Error - Error del servidor</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="text-center text-muted mb-4">
+                    <p>Seguimiento Legislativo Español • API v1.0</p>
+                    <p>Última actualización: 2026-05-19</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -48,6 +48,12 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/api")
+def api_docs():
+    """Documentación de la API."""
+    return render_template("api_docs.html")
+
+
 @app.route("/congreso")
 def congreso():
     return render_template("congreso.html")
