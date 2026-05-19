@@ -175,7 +175,7 @@ function mostrarIniciativas(iniciativas) {
                     ` : ''}
                     ${ini.fecha_presentacion ? `
                         <div class="iniciativa-meta-item">
-                            <i class="fas fa-calendar"></i>
+                            <i class="fas fa-calendar-alt"></i>
                             <span>${formatarFecha(ini.fecha_presentacion)}</span>
                         </div>
                     ` : ''}
