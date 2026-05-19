@@ -201,6 +201,50 @@ def cargar_camaras_defecto():
             )
             conn.commit()
             log.info("Cámaras por defecto cargadas")
+        
+        # Cargar grupos por defecto para Congreso
+        cur.execute("SELECT id FROM camaras WHERE nombre = ?", ("Congreso de Diputados",))
+        congreso_id = cur.fetchone()
+        if congreso_id:
+            congreso_id = congreso_id[0]
+            cur.execute("SELECT COUNT(*) FROM grupos WHERE camara_id = ?", (congreso_id,))
+            if cur.fetchone()[0] == 0:
+                grupos_congreso = [
+                    ("Grupo Parlamentario Vasco (EAJ-PNV)", "nacionalista"),
+                    ("Grupo Socialista", "izquierda"),
+                    ("Grupo Popular", "derecha"),
+                    ("Grupo Podemos", "izquierda"),
+                    ("Grupo Ciudadanos", "centro"),
+                    ("Grupo VOX", "extrema derecha"),
+                ]
+                for nombre, ideologia in grupos_congreso:
+                    cur.execute("""
+                        INSERT OR IGNORE INTO grupos (camara_id, nombre, ideologia)
+                        VALUES (?, ?, ?)
+                    """, (congreso_id, nombre, ideologia))
+                conn.commit()
+                log.info("Grupos del Congreso cargados")
+        
+        # Cargar grupos por defecto para Andalucía
+        cur.execute("SELECT id FROM camaras WHERE nombre = ?", ("Parlamento de Andalucía",))
+        andalucia_id = cur.fetchone()
+        if andalucia_id:
+            andalucia_id = andalucia_id[0]
+            cur.execute("SELECT COUNT(*) FROM grupos WHERE camara_id = ?", (andalucia_id,))
+            if cur.fetchone()[0] == 0:
+                grupos_andalucia = [
+                    ("Grupo Socialista Andaluz", "izquierda"),
+                    ("Grupo Popular Andaluz", "derecha"),
+                    ("Grupo Unidas Podemos", "izquierda"),
+                    ("Ciudadanos", "centro"),
+                ]
+                for nombre, ideologia in grupos_andalucia:
+                    cur.execute("""
+                        INSERT OR IGNORE INTO grupos (camara_id, nombre, ideologia)
+                        VALUES (?, ?, ?)
+                    """, (andalucia_id, nombre, ideologia))
+                conn.commit()
+                log.info("Grupos de Andalucía cargados")
 
 
 def obtener_camara(nombre: str) -> dict:
@@ -294,6 +338,7 @@ def obtener_iniciativas(camara_id: int = None, tipo: str = None, estado: str = N
                        pagina: int = 1, por_pagina: int = 20) -> tuple:
     """
     Obtiene iniciativas con filtros. Retorna (total, datos).
+    Los datos incluyen temáticas y posición de partidos.
     """
     with get_db() as conn:
         cur = conn.cursor()
@@ -348,6 +393,23 @@ def obtener_iniciativas(camara_id: int = None, tipo: str = None, estado: str = N
         
         cur.execute(query, params)
         datos = [dict(row) for row in cur.fetchall()]
+        
+        # Enriquecer con temáticas y posiciones
+        for item in datos:
+            # Temáticas
+            cur.execute("SELECT tema FROM tematicas WHERE iniciativa_id = ? ORDER BY tema", 
+                       (item['id'],))
+            item['tematicas'] = [row['tema'] for row in cur.fetchall()]
+            
+            # Posiciones de grupos
+            cur.execute("""
+                SELECT g.nombre, p.posicion 
+                FROM posiciones p
+                JOIN grupos g ON p.grupo_id = g.id
+                WHERE p.iniciativa_id = ?
+                ORDER BY g.nombre
+            """, (item['id'],))
+            item['posicion_grupos'] = {row['nombre']: row['posicion'] for row in cur.fetchall()}
         
         return total, datos
 

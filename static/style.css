@@ -109,9 +109,86 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Posiciones de partidos */
+.posiciones-container {
+    border-top: 1px solid #e0e0e0;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+.posiciones-titulo {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.posiciones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+}
+
+.posicion-grupo {
+    padding: 0.65rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    border: 1px solid #e0e0e0;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.posicion-grupo:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+.posicion-grupo-nombre {
+    font-weight: 600;
+    color: #333;
+    display: block;
+    margin-bottom: 0.3rem;
+}
+
+.posicion-grupo-voto {
+    font-weight: 500;
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+}
+
+.posicion-grupo-voto.favor {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.posicion-grupo-voto.contra {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.posicion-grupo-voto.abstencion {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.posicion-grupo-voto.desconocido {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
 @media (max-width: 768px) {
     .iniciativa-meta {
         flex-direction: column;
         gap: 0.35rem;
+    }
+    
+    .posiciones-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     }
 }

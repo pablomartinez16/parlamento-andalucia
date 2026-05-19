@@ -117,7 +117,36 @@ function mostrarIniciativas(iniciativas) {
         return;
     }
     
-    const html = iniciativas.map(ini => `
+    const html = iniciativas.map(ini => {
+        // Generar HTML para posiciones de partidos
+        let posicionesHtml = '';
+        if (ini.posicion_grupos && typeof ini.posicion_grupos === 'object' && Object.keys(ini.posicion_grupos).length > 0) {
+            const posiciones = Object.entries(ini.posicion_grupos).map(([grupo, posicion]) => {
+                const posicionLower = posicion?.toLowerCase() || 'desconocido';
+                const clasePosicion = posicionLower.includes('favor') ? 'favor' : 
+                                     posicionLower.includes('contra') ? 'contra' :
+                                     posicionLower.includes('abstención') ? 'abstencion' : 'desconocido';
+                return `
+                    <div class="posicion-grupo">
+                        <span class="posicion-grupo-nombre">${escaparHtml(grupo)}</span>
+                        <span class="posicion-grupo-voto ${clasePosicion}">${escaparHtml(posicion || 'Desconocido')}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            posicionesHtml = `
+                <div class="posiciones-container">
+                    <div class="posiciones-titulo">
+                        <i class="fas fa-chart-pie"></i> Posiciones de Partidos
+                    </div>
+                    <div class="posiciones-grid">
+                        ${posiciones}
+                    </div>
+                </div>
+            `;
+        }
+        
+        return `
         <div class="card iniciativa-card ${ini.estado || 'pendiente'}">
             <div class="card-body">
                 <div class="row mb-2">
@@ -160,6 +189,8 @@ function mostrarIniciativas(iniciativas) {
                     </div>
                 ` : ''}
                 
+                ${posicionesHtml}
+                
                 <div class="mt-3">
                     <a href="${escaparHtml(ini.url)}" target="_blank" class="btn btn-sm btn-outline-primary">
                         <i class="fas fa-external-link-alt"></i> Ver en oficial
@@ -167,7 +198,8 @@ function mostrarIniciativas(iniciativas) {
                 </div>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
     
     container.innerHTML = html;
 }
