@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}{{ iniciativa.expediente }} — {{ iniciativa.titulo }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ul>
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/iniciativas">Iniciativas</a></li>
+        <li>{{ iniciativa.expediente }}</li>
+    </ul>
+</nav>
+
+<article>
+    <header>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.8rem;">
+            <span class="badge badge-tipo">{{ iniciativa.tipo }}</span>
+            <span class="badge {% if 'tramit' in (iniciativa.estado or '').lower() %}badge-tramitacion{% elif 'aprob' in (iniciativa.estado or '').lower() %}badge-aprobada{% else %}badge-rechazada{% endif %}">
+                {{ iniciativa.estado or 'Estado no informado' }}
+            </span>
+            {% if iniciativa.legislatura %}
+            <span class="badge badge-tipo">{{ iniciativa.legislatura.nombre }}</span>
+            {% endif %}
+        </div>
+        <h2 style="margin-bottom: 0.5rem;">{{ iniciativa.titulo }}</h2>
+        <div style="color: #6b7280; font-size: 0.9rem;">
+            Expediente: <strong>{{ iniciativa.expediente }}</strong>
+            {% if iniciativa.numero_registro %} · Registro: {{ iniciativa.numero_registro }}{% endif %}
+            {% if iniciativa.fecha_creacion %} · Fecha creación: {{ iniciativa.fecha_creacion.strftime('%d/%m/%Y') }}{% endif %}
+        </div>
+    </header>
+
+    <div class="grid" style="margin-bottom: 1.5rem;">
+        <div>
+            <strong>Proponente</strong>
+            <p>{{ iniciativa.proponente or 'No especificado' }}</p>
+        </div>
+        <div>
+            <strong>Procedimiento</strong>
+            <p>{{ iniciativa.procedimiento or 'Ordinario' }}</p>
+        </div>
+        <div>
+            <strong>Fuente Oficial</strong>
+            <p>
+                <a href="{{ iniciativa.url_ficha }}" target="_blank" rel="noopener">
+                    Ver ficha en parlamentodeandalucia.es ↗
+                </a>
+            </p>
+        </div>
+    </div>
+
+    {% if iniciativa.resumen_auto %}
+    <div style="background-color: #f0fdf4; border-left: 4px solid #007A3D; padding: 1rem; border-radius: 4px; margin-bottom: 2rem;">
+        <h4 style="color: #166534; margin-bottom: 0.4rem;">💡 Resumen en Lenguaje Llano (Automático)</h4>
+        <p style="margin-bottom: 0.3rem;">{{ iniciativa.resumen_auto }}</p>
+        <small style="color: #15803d; font-size: 0.78rem;">
+            Generado automáticamente mediante inteligencia artificial de forma objetiva a partir del texto y extracto fuente.
+        </small>
+    </div>
+    {% elif iniciativa.extracto and iniciativa.extracto != iniciativa.titulo %}
+    <div style="background-color: #f8fafc; border-left: 4px solid #94a3b8; padding: 1rem; border-radius: 4px; margin-bottom: 2rem;">
+        <h4 style="color: #334155; margin-bottom: 0.4rem;">Extracto oficial de la iniciativa</h4>
+        <p style="margin-bottom: 0;">{{ iniciativa.extracto }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Documentación Oficial Asociada -->
+    <section style="margin-bottom: 2.5rem;">
+        <h3>📄 Documentos Oficiales Íntegros (PDF)</h3>
+        {% if iniciativa.documentos %}
+        <ul>
+            {% for doc in iniciativa.documentos %}
+            <li style="margin-bottom: 0.5rem;">
+                <a href="{{ doc.url }}" target="_blank" rel="noopener" style="font-weight: 600;">
+                    Descargar {{ doc.titulo }} (PDF Oficial) ↗
+                </a>
+                <span class="badge badge-tipo" style="margin-left: 0.5rem;">{{ doc.tipo }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p style="color: #6b7280;">No se han vinculado documentos PDF específicos para esta iniciativa.</p>
+        {% endif %}
+    </section>
+
+    <!-- Votaciones de la Iniciativa -->
+    {% if iniciativa.votaciones %}
+    <section style="margin-bottom: 2.5rem;">
+        <h3>🗳️ Resultado de Votaciones</h3>
+        {% for vot in iniciativa.votaciones %}
+        <article style="border: 1px solid #e5e7eb; padding: 1.2rem; margin-bottom: 1.2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h4 style="margin-bottom: 0;">{{ vot.titulo }}</h4>
+                <span class="badge {% if vot.resultado == 'Aprobada' %}badge-aprobada{% else %}badge-rechazada{% endif %}">
+                    {{ vot.resultado }}
+                </span>
+            </div>
+            <p style="color: #6b7280; font-size: 0.85rem; margin-bottom: 1rem;">
+                Fecha: {{ vot.fecha.strftime('%d/%m/%Y') }} {% if vot.organo %}· Órgano: {{ vot.organo }}{% endif %}
+            </p>
+
+            <!-- Barra gráfica de votos -->
+            {% set total_votos = vot.votos_favor + vot.votos_contra + vot.abstenciones %}
+            {% if total_votos > 0 %}
+            <div class="vote-bar-container">
+                <div class="vote-favor" style="width: {{ (vot.votos_favor / total_votos * 100)|round(1) }}%;" title="A favor: {{ vot.votos_favor }}"></div>
+                <div class="vote-contra" style="width: {{ (vot.votos_contra / total_votos * 100)|round(1) }}%;" title="En contra: {{ vot.votos_contra }}"></div>
+                <div class="vote-abstencion" style="width: {{ (vot.abstenciones / total_votos * 100)|round(1) }}%;" title="Abstención: {{ vot.abstenciones }}"></div>
+            </div>
+            {% endif %}
+
+            <div style="display: flex; gap: 1.5rem; font-size: 0.9rem; margin-bottom: 1rem;">
+                <span style="color: #10b981; font-weight: bold;">✔ A favor: {{ vot.votos_favor }}</span>
+                <span style="color: #ef4444; font-weight: bold;">✖ En contra: {{ vot.votos_contra }}</span>
+                <span style="color: #f59e0b; font-weight: bold;">⚪ Abstenciones: {{ vot.abstenciones }}</span>
+                {% if vot.ausencias %}<span style="color: #6b7280;">Ausentes: {{ vot.ausencias }}</span>{% endif %}
+            </div>
+
+            <!-- Desglose por grupo parlamentario -->
+            {% if vot.desglose_grupos %}
+            <details>
+                <summary style="font-size: 0.9rem;">Ver desglose de voto por Grupo Parlamentario</summary>
+                <table style="margin-top: 0.5rem;">
+                    <thead>
+                        <tr>
+                            <th>Grupo Parlamentario</th>
+                            <th>Sentido del Voto</th>
+                            <th>Número de Votos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vg in vot.desglose_grupos %}
+                        <tr>
+                            <td>
+                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: {{ vg.grupo.color_hex or '#6c757d' }}; margin-right: 6px;"></span>
+                                {{ vg.grupo.nombre }}
+                            </td>
+                            <td>
+                                <strong>{{ vg.sentido }}</strong>
+                            </td>
+                            <td>{{ vg.num_votos }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </details>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    <!-- Historial de Trámites -->
+    <section>
+        <h3>⏳ Historial de Tramitación</h3>
+        {% if iniciativa.tramites %}
+        <div style="border-left: 2px solid #007A3D; padding-left: 1.2rem; margin-left: 0.5rem;">
+            {% for t in iniciativa.tramites %}
+            <div style="margin-bottom: 1.5rem; position: relative;">
+                <div style="font-size: 0.85rem; color: #6b7280;">
+                    {% if t.fecha %}{{ t.fecha.strftime('%d/%m/%Y') }}{% else %}Fecha no registrada{% endif %}
+                    {% if t.organo_tramitador %} · {{ t.organo_tramitador }}{% endif %}
+                </div>
+                <div style="font-weight: 600; margin: 0.2rem 0;">{{ t.descripcion }}</div>
+                {% if t.sesion %}
+                <small style="color: #4b5563;">Sesi&oacute;n nº {{ t.sesion }}</small>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color: #6b7280;">No hay trámites registrados para esta iniciativa.</p>
+        {% endif %}
+    </section>
+
+    <footer style="margin-top: 2rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;">
+        <small style="color: #9ca3af;">
+            Última sincronización local: {{ iniciativa.updated_at.strftime('%d/%m/%Y %H:%M') }} | 
+            Expediente permanente: <code>/iniciativa/{{ iniciativa.expediente }}</code>
+        </small>
+    </footer>
+</article>
+{% endblock %}

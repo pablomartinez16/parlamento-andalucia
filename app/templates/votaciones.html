@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Votaciones Parlamentarias — Parlamento Abierto Andalucía{% endblock %}
+
+{% block content %}
+<h2>Votaciones del Parlamento de Andalucía</h2>
+<p>Registro histórico de votaciones plenarias con desglose de apoyos, rechazos y abstenciones.</p>
+
+{% if votaciones %}
+<div class="grid" style="grid-template-columns: 1fr;">
+    {% for vot in votaciones %}
+    <article style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <span class="badge {% if vot.resultado == 'Aprobada' %}badge-aprobada{% else %}badge-rechazada{% endif %}">
+                    {{ vot.resultado }}
+                </span>
+                <span style="color: #6b7280; font-size: 0.85rem; margin-left: 0.5rem;">{{ vot.fecha.strftime('%d/%m/%Y') }}</span>
+                {% if vot.organo %}<span style="color: #6b7280; font-size: 0.85rem;">· {{ vot.organo }}</span>{% endif %}
+            </div>
+            {% if vot.iniciativa %}
+            <a href="/iniciativa/{{ vot.iniciativa.expediente }}" class="badge badge-tipo" style="text-decoration: none;">
+                {{ vot.iniciativa.expediente }}
+            </a>
+            {% endif %}
+        </div>
+
+        <h3 style="margin-top: 0.5rem; margin-bottom: 0.8rem;">{{ vot.titulo }}</h3>
+
+        {% set total_votos = vot.votos_favor + vot.votos_contra + vot.abstenciones %}
+        {% if total_votos > 0 %}
+        <div class="vote-bar-container">
+            <div class="vote-favor" style="width: {{ (vot.votos_favor / total_votos * 100)|round(1) }}%;" title="A favor: {{ vot.votos_favor }}"></div>
+            <div class="vote-contra" style="width: {{ (vot.votos_contra / total_votos * 100)|round(1) }}%;" title="En contra: {{ vot.votos_contra }}"></div>
+            <div class="vote-abstencion" style="width: {{ (vot.abstenciones / total_votos * 100)|round(1) }}%;" title="Abstención: {{ vot.abstenciones }}"></div>
+        </div>
+        {% endif %}
+
+        <div style="display: flex; gap: 1.5rem; font-size: 0.9rem; margin-top: 0.5rem;">
+            <span style="color: #10b981; font-weight: bold;">✔ A favor: {{ vot.votos_favor }}</span>
+            <span style="color: #ef4444; font-weight: bold;">✖ En contra: {{ vot.votos_contra }}</span>
+            <span style="color: #f59e0b; font-weight: bold;">⚪ Abstenciones: {{ vot.abstenciones }}</span>
+            {% if vot.ausencias %}<span style="color: #6b7280;">Ausentes: {{ vot.ausencias }}</span>{% endif %}
+        </div>
+
+        {% if vot.desglose_grupos %}
+        <details style="margin-top: 1rem;">
+            <summary style="font-size: 0.9rem;">Ver desglose por grupo parlamentario</summary>
+            <table style="margin-top: 0.5rem;">
+                <thead>
+                    <tr>
+                        <th>Grupo Parlamentario</th>
+                        <th>Sentido del Voto</th>
+                        <th>Votos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vg in vot.desglose_grupos %}
+                    <tr>
+                        <td>
+                            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: {{ vg.grupo.color_hex or '#6c757d' }}; margin-right: 6px;"></span>
+                            {{ vg.grupo.nombre }}
+                        </td>
+                        <td><strong>{{ vg.sentido }}</strong></td>
+                        <td>{{ vg.num_votos }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </details>
+        {% endif %}
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<article>
+    <p>No se han cargado votaciones plenarias todavía.</p>
+</article>
+{% endif %}
+{% endblock %}

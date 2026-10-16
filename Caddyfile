@@ -1,0 +1,23 @@
+# Si tienes dominio público con DNS apuntando a la VM, descomenta y pon tu dominio:
+# tu-dominio.com {
+#     reverse_proxy web:8000
+# }
+
+# Configuración para Cloudflare Tunnel o acceso HTTP directo
+:80 {
+    reverse_proxy web:8000 {
+        # Preserva las cabeceras de proxy de Cloudflare (IP real del visitante, esquema https)
+        header_up X-Real-IP {http.request.header.Cf-Connecting-Ip}
+        header_up X-Forwarded-For {http.request.header.Cf-Connecting-Ip}
+        header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+    }
+    
+    encode gzip zstd
+    
+    # Cabeceras de seguridad
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+}

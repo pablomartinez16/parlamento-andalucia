@@ -1,0 +1,5 @@
+/* Custom overrides and accessibility enhancements on top of Pico.css */
+:focus {
+    outline: 2px solid #007A3D !important;
+    outline-offset: 2px;
+}

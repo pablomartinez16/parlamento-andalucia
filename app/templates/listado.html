@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Buscador de Iniciativas — Parlamento Abierto Andalucía{% endblock %}
+
+{% block content %}
+<h2>Iniciativas Parlamentarias</h2>
+
+<!-- Filtros y Búsqueda -->
+<article style="padding: 1.2rem; margin-bottom: 2rem;">
+    <form method="GET" action="/iniciativas">
+        <div class="grid">
+            <div>
+                <label for="q">Término de búsqueda</label>
+                <input type="text" id="q" name="q" value="{{ filters.q or '' }}" placeholder="Título, ley, materia, expediente...">
+            </div>
+            <div>
+                <label for="tipo">Tipo de iniciativa</label>
+                <select id="tipo" name="tipo">
+                    <option value="">Todos los tipos</option>
+                    {% for t in tipos_disponibles %}
+                    <option value="{{ t }}" {% if filters.tipo == t %}selected{% endif %}>{{ t }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="estado">Estado</label>
+                <select id="estado" name="estado">
+                    <option value="">Todos los estados</option>
+                    {% for e in estados_disponibles %}
+                    <option value="{{ e }}" {% if filters.estado == e %}selected{% endif %}>{{ e }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
+            <a href="/iniciativas" role="button" class="secondary outline">Limpiar filtros</a>
+            <input type="submit" value="Filtrar">
+        </div>
+    </form>
+</article>
+
+<!-- Listado de resultados -->
+<div>
+    <div style="margin-bottom: 1rem; color: #6b7280;">
+        Se encontraron <strong>{{ total }}</strong> iniciativas coincidentes.
+    </div>
+
+    {% if iniciativas %}
+    {% for ini in iniciativas %}
+    <article style="margin-bottom: 1.2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <div>
+                <span class="badge badge-tipo">{{ ini.tipo }}</span>
+                <span class="badge {% if 'tramit' in (ini.estado or '').lower() %}badge-tramitacion{% elif 'aprob' in (ini.estado or '').lower() %}badge-aprobada{% else %}badge-rechazada{% endif %}">
+                    {{ ini.estado or 'Desconocido' }}
+                </span>
+                <small style="color: #6b7280; margin-left: 0.5rem;">Expediente: <strong>{{ ini.expediente }}</strong></small>
+            </div>
+            {% if ini.fecha_creacion %}
+            <small style="color: #6b7280;">{{ ini.fecha_creacion.strftime('%d/%m/%Y') }}</small>
+            {% endif %}
+        </div>
+
+        <h4>
+            <a href="/iniciativa/{{ ini.expediente }}" style="text-decoration: none; color: inherit;">
+                {{ ini.titulo }}
+            </a>
+        </h4>
+
+        {% if ini.proponente %}
+        <p style="margin-bottom: 0.5rem; font-size: 0.9rem;">
+            <strong>Proponente:</strong> {{ ini.proponente }}
+        </p>
+        {% endif %}
+
+        {% if ini.resumen_auto %}
+        <div style="background: #f8fafc; border-left: 3px solid #007A3D; padding: 0.5rem 0.8rem; font-size: 0.88rem; margin: 0.8rem 0;">
+            <small style="display: block; font-weight: bold; color: #007A3D;">Resumen en lenguaje llano (automático):</small>
+            {{ ini.resumen_auto }}
+        </div>
+        {% elif ini.extracto and ini.extracto != ini.titulo %}
+        <p style="font-size: 0.9rem; color: #4b5563; margin-bottom: 0.8rem;">
+            {{ ini.extracto[:220] }}{% if ini.extracto|length > 220 %}...{% endif %}
+        </p>
+        {% endif %}
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+            <div style="display: flex; gap: 0.8rem;">
+                <a href="/iniciativa/{{ ini.expediente }}" role="button" class="secondary outline" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;">
+                    Ver ficha y documentos oficiales
+                </a>
+            </div>
+            <a href="{{ ini.url_ficha }}" target="_blank" rel="noopener" style="font-size: 0.85rem;">
+                Fuente oficial ↗
+            </a>
+        </div>
+    </article>
+    {% endfor %}
+
+    <!-- Paginación -->
+    {% if total_pages > 1 %}
+    <nav aria-label="Paginación" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
+        {% if current_page > 1 %}
+        <a href="?page={{ current_page - 1 }}&q={{ filters.q or '' }}&tipo={{ filters.tipo or '' }}&estado={{ filters.estado or '' }}" role="button" class="secondary outline">← Anterior</a>
+        {% endif %}
+        
+        <span style="align-self: center; padding: 0 1rem;">Página {{ current_page }} de {{ total_pages }}</span>
+        
+        {% if current_page < total_pages %}
+        <a href="?page={{ current_page + 1 }}&q={{ filters.q or '' }}&tipo={{ filters.tipo or '' }}&estado={{ filters.estado or '' }}" role="button" class="secondary outline">Siguiente →</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <article>
+        <p>No se encontraron iniciativas con los criterios seleccionados.</p>
+    </article>
+    {% endif %}
+</div>
+{% endblock %}

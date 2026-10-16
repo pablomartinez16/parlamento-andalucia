@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio — Parlamento Abierto Andalucía{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Actividad Legislativa del Parlamento de Andalucía</h2>
+    <p>Seguimiento transparente de proposiciones de ley, proyectos de ley, decretos y mociones de la comunidad autónoma.</p>
+    
+    <div class="grid" style="margin-bottom: 2rem;">
+        <article>
+            <header><strong>Iniciativas Registradas</strong></header>
+            <h3 style="margin-bottom: 0;">{{ stats.total_iniciativas }}</h3>
+            <small>Actualizadas automáticamente vía RSS y boletines</small>
+        </article>
+        <article>
+            <header><strong>Leyes y Proyectos</strong></header>
+            <h3 style="margin-bottom: 0;">{{ stats.total_leyes }}</h3>
+            <small>Leyes aprobadas o en trámite</small>
+        </article>
+        <article>
+            <header><strong>Votaciones Registradas</strong></header>
+            <h3 style="margin-bottom: 0;">{{ stats.total_votaciones }}</h3>
+            <small>Con desglose por grupos parlamentarios</small>
+        </article>
+    </div>
+
+    <form method="GET" action="/iniciativas" role="search">
+        <fieldset role="group">
+            <input type="search" name="q" placeholder="Buscar por título, temática, número de expediente (ej. 13-26/PPL-000002)...">
+            <input type="submit" value="Buscar Iniciativas">
+        </fieldset>
+    </form>
+</section>
+
+<section>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>Últimas iniciativas incorporadas</h3>
+        <a href="/iniciativas">Ver todas →</a>
+    </div>
+
+    {% if ultimas %}
+    <div class="grid" style="grid-template-columns: 1fr;">
+        {% for ini in ultimas %}
+        <article style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                <div>
+                    <span class="badge badge-tipo">{{ ini.tipo }}</span>
+                    <span class="badge {% if 'tramit' in (ini.estado or '').lower() %}badge-tramitacion{% elif 'aprob' in (ini.estado or '').lower() %}badge-aprobada{% else %}badge-rechazada{% endif %}">
+                        {{ ini.estado or 'Estado no informado' }}
+                    </span>
+                    <small style="color: #6b7280; margin-left: 0.5rem;">Expediente: <strong>{{ ini.expediente }}</strong></small>
+                </div>
+                {% if ini.fecha_creacion %}
+                <small style="color: #6b7280;">{{ ini.fecha_creacion.strftime('%d/%m/%Y') }}</small>
+                {% endif %}
+            </div>
+            
+            <h4>
+                <a href="/iniciativa/{{ ini.expediente }}" style="text-decoration: none; color: inherit;">
+                    {{ ini.titulo }}
+                </a>
+            </h4>
+
+            {% if ini.proponente %}
+            <p style="margin-bottom: 0.5rem; font-size: 0.9rem;">
+                <strong>Proponente:</strong> {{ ini.proponente }}
+            </p>
+            {% endif %}
+
+            <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem;">
+                <a href="/iniciativa/{{ ini.expediente }}" role="button" class="secondary outline" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
+                    Ver ficha completa y trámites
+                </a>
+                <a href="{{ ini.url_ficha }}" target="_blank" rel="noopener" style="font-size: 0.85rem;">
+                    Ficha oficial en Parlamento ↗
+                </a>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No hay iniciativas registradas aún. Ejecuta una sincronización desde el panel o por consola.</p>
+    {% endif %}
+</section>
+{% endblock %}

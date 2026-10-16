@@ -1,0 +1,43 @@
+# Entornos virtuales y Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Secretos y credenciales de entorno (NUNCA SUBIR)
+.env
+*.env.local
+
+# Bases de datos y almacenamiento local
+*.sqlite
+*.sqlite3
+*.db
+postgres_data/
+
+# Logs y volcados
+*.log
+logs/
+*.sql
+*.sql.gz
+scripts/backup/
+
+# Caddy y SSL
+caddy_data/
+caddy_config/
+
+# IDEs y editores
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Cobertura y tests
+.pytest_cache/
+.coverage
+htmlcov/
