@@ -129,23 +129,39 @@ class IniciativaScraper(BaseScraper):
                     "doc_id": doc_id
                 })
 
-        # Deduplicate documentos by URL
+        def clean_text(val: Optional[str]) -> str:
+            if not val:
+                return ""
+            # Reconstruct double-encoded UTF-8 as Latin1/Windows-1252 if present
+            try:
+                if "Â" in val or "Ã" in val:
+                    val = val.encode("latin1").decode("utf-8")
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                pass
+            # Specific replacement for masculine/feminine ordinal and common mojibake sequences
+            val = val.replace("nÂº", "nº").replace("NÂº", "Nº")
+            val = val.replace("Âº", "º").replace("Âª", "ª")
+            val = val.replace("Â", "")
+            return val.strip()
+
+        # Deduplicate documentos by URL and clean titles
         seen_urls = set()
         unique_docs = []
         for doc in documentos:
             if doc["url"] not in seen_urls:
                 seen_urls.add(doc["url"])
+                doc["titulo"] = clean_text(doc["titulo"])
                 unique_docs.append(doc)
 
         return {
             "expediente": expediente,
             "legislatura_numero": leg_num,
-            "titulo": titulo,
-            "extracto": extracto,
-            "tipo": tipo,
-            "proponente": proponente,
-            "estado": estado,
-            "procedimiento": procedimiento,
+            "titulo": clean_text(titulo),
+            "extracto": clean_text(extracto),
+            "tipo": clean_text(tipo),
+            "proponente": clean_text(proponente),
+            "estado": clean_text(estado),
+            "procedimiento": clean_text(procedimiento),
             "numero_registro": num_registro,
             "fecha_creacion": fecha_creacion,
             "url_ficha": url,

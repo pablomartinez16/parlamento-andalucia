@@ -8,19 +8,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("seed")
 
 INITIAL_EXPEDIENTES = [
-    # XIII Legislatura (Actual)
+    # XIII Legislatura (Actual - Año 2026)
     "13-26/PPL-000001",
     "13-26/PPL-000002",
     "13-26/ILPA-000001",
-    # XII Legislatura (Históricas y leyes consolidadas)
+    # XII Legislatura (Leyes consolidadas y votaciones representativas)
     "12-25/PL-000001",
-    "12-25/PL-000002",
-    "12-25/PL-000003",
-    "12-25/PL-000004",
-    "12-25/PL-000005",
-    "12-25/PL-000007",
-    "12-25/PL-000008",
-    "12-25/PL-000010",
     "12-25/PL-000011",
 ]
 

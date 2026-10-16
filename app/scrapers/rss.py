@@ -72,7 +72,7 @@ class RSSScraper(BaseScraper):
                 clean_title = re.sub(r'^\d{1,2}-\d{2}/[A-Z]+-\d{6}\.\s*', '', title).strip()
                 results.append({
                     "expediente": expediente,
-                    "titulo": clean_title or title,
+                    "titulo": self._clean_text(clean_title or title),
                     "link": link,
                     "fecha_publicacion": pub_date,
                     "tipo_feed": feed_type
@@ -106,9 +106,23 @@ class RSSScraper(BaseScraper):
             results.append({
                 "numero": numero,
                 "id": bopa_id,
-                "titulo": title,
+                "titulo": self._clean_text(title),
                 "pdf_url": pdf_url,
                 "link": link
             })
 
         return results
+
+    @staticmethod
+    def _clean_text(val: Optional[str]) -> str:
+        if not val:
+            return ""
+        try:
+            if "Â" in val or "Ã" in val:
+                val = val.encode("latin1").decode("utf-8")
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            pass
+        val = val.replace("nÂº", "nº").replace("NÂº", "Nº")
+        val = val.replace("Âº", "º").replace("Âª", "ª")
+        val = val.replace("Â", "")
+        return val.strip()

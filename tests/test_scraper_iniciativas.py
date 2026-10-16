@@ -33,7 +33,7 @@ SAMPLE_HTML = """
 <div class="sep"><hr /></div>
 <dt class="float-left mr-2">Fecha:</dt><dd class="mb-0">21/09/2026</dd>
 <dt class="float-left mr-2">Descripción:</dt><dd class="mb-0">Publicación de la Proposición de Ley</dd>
-<a href="/webdinamica/portal-web-parlamento/pdf.do?tipodoc=bopa&id=205114">BOPA nº 40 - 21/09/2026</a>
+<a href="/webdinamica/portal-web-parlamento/pdf.do?tipodoc=bopa&id=205114">BOPA nÂº 40 - 21/09/2026</a>
 <div class="sep"><hr /></div>
 </dl>
 </body>
@@ -59,8 +59,10 @@ def test_parse_iniciativa_html():
     assert len(data["tramites"]) >= 2
     assert "Documentación complementaria" in data["tramites"][0]["descripcion"]
 
-    # Documents validation
+    # Documents validation (verifying Mojibake 'nÂº' was cleaned to 'nº')
     assert len(data["documentos"]) == 1
     assert data["documentos"][0]["tipo"] == "BOPA"
     assert data["documentos"][0]["doc_id"] == "205114"
+    assert "nÂº" not in data["documentos"][0]["titulo"]
+    assert "nº" in data["documentos"][0]["titulo"]
     assert "https://www.parlamentodeandalucia.es" in data["documentos"][0]["url"]
