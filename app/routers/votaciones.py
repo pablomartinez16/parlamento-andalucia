@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
-from app.models import Votacion
+from app.models import Votacion, VotoGrupo
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -18,7 +18,7 @@ async def listado_votaciones(request: Request, db: AsyncSession = Depends(get_db
         select(Votacion)
         .options(
             selectinload(Votacion.iniciativa),
-            selectinload(Votacion.desglose_grupos)
+            selectinload(Votacion.desglose_grupos).selectinload(VotoGrupo.grupo)
         )
         .order_by(desc(Votacion.fecha), desc(Votacion.id))
     )

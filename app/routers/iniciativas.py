@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
-from app.models import Iniciativa, Legislatura, Tramite, Documento, Votacion
+from app.models import Iniciativa, Legislatura, Tramite, Documento, Votacion, VotoGrupo
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -119,7 +119,7 @@ async def detalle_iniciativa(
             selectinload(Iniciativa.legislatura),
             selectinload(Iniciativa.tramites),
             selectinload(Iniciativa.documentos),
-            selectinload(Iniciativa.votaciones).selectinload(Votacion.desglose_grupos)
+            selectinload(Iniciativa.votaciones).selectinload(Votacion.desglose_grupos).selectinload(VotoGrupo.grupo)
         )
     )
     res = await db.execute(stmt)
